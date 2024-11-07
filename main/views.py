@@ -53,3 +53,10 @@ def logout_user(request):
     response = HttpResponseRedirect(reverse('main:login'))
     response.delete_cookie('last_login')
     return response
+
+def home(request):
+    # Might broke something LUL - Corfliss
+    context = {
+        'title' : 'Sijarta Homepage'
+    }
+    return render(request, "home.html", context)

@@ -58,7 +58,7 @@ ROOT_URLCONF = 'db_thelastofus_groupassignment.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': [BASE_DIR / 'templates', 'static'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
