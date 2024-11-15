@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}
+<title>Profile</title>
+{% endblock meta %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto bg-white mt-4">
+    <div class="flex flex-col justify-center items-center">
+        <h1 class="text-3xl mb-4">Worker's Profile</h1>
+        <img class="rounded-full w-48 h-48 mb-4" src="{% static 'images/maddogsquared.jpg' %}" alt="Test images">
+        <div class="text-left">
+            <p>Name: Greget McCoolguy</p>
+            <p>Rate: 11/10</p>
+            <p>Finsihed Order Count: 9</p>
+            <p>phone Number: 08123456789</p>
+            <p>Birth Date: 1987/6/5</p>
+            <p>Address: 2 Eezee Road</p>
+        </div>
+    </div>
+
+</div>
+{% endblock content %}

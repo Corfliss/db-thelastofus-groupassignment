@@ -67,3 +67,10 @@ def subcategory(request):
         'title' : 'Sijarta Subcategory'
     }
     return render(request, "subcategory.html", context)
+
+def profile(request):
+    # Might broke something LUL - Corfliss
+    context = {
+        'title' : 'Sijarta Profile'
+    }
+    return render(request, "profile.html", context)
