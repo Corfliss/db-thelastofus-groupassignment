@@ -60,3 +60,10 @@ def home(request):
         'title' : 'Sijarta Homepage'
     }
     return render(request, "home.html", context)
+
+def subcategory(request):
+    # Might broke something LUL - Corfliss
+    context = {
+        'title' : 'Sijarta Subcategory'
+    }
+    return render(request, "subcategory.html", context)
