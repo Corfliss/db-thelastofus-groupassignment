@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Discount Page</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f9f9f9;
+        margin: 0;
+        padding: 20px;
+    }
+
+    .container {
+        width: 80%;
+        margin: auto;
+        background-color: #fff;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .voucher-section, .promo-section {
+        margin-bottom: 20px;
+        border: 1px solid #ddd;
+        padding: 15px;
+        border-radius: 8px;
+    }
+
+    .voucher-header, .promo-header {
+        font-weight: bold;
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .voucher-table, .promo-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .voucher-table th, .voucher-table td,
+    .promo-table th, .promo-table td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: center;
+    }
+
+    .voucher-table th {
+        background-color: #f0f0f0;
+    }
+
+    .buy-btn {
+        padding: 5px 10px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .buy-btn:hover {
+        background-color: #0056b3;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Discount</h2>
+
+    <!-- Voucher Section -->
+    <div class="voucher-section">
+        <div class="voucher-header">
+            <span>Voucher</span>
+        </div>
+        <table class="voucher-table">
+            <tr>
+                <th>Code</th>
+                <th>Discount</th>
+                <th>Min Tr Order</th>
+                <th>Number Day Valid</th>
+                <th>User Quota</th>
+                <th>Price</th>
+                <th>Action</th>
+            </tr>
+            <!-- Example Row 1 -->
+            <tr>
+                <td>VOUCHER10</td>
+                <td>10%</td>
+                <td>$50</td>
+                <td>30 days</td>
+                <td>100</td>
+                <td>$5</td>
+                <td><button class="buy-btn">Buy</button></td>
+            </tr>
+            <!-- Example Row 2 -->
+            <tr>
+                <td>VOUCHER20</td>
+                <td>20%</td>
+                <td>$100</td>
+                <td>15 days</td>
+                <td>50</td>
+                <td>$10</td>
+                <td><button class="buy-btn">Buy</button></td>
+            </tr>
+            <!-- Example Row 3 -->
+            <tr>
+                <td>VOUCHER30</td>
+                <td>30%</td>
+                <td>$150</td>
+                <td>10 days</td>
+                <td>30</td>
+                <td>$15</td>
+                <td><button class="buy-btn">Buy</button></td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Promo Section -->
+    <div class="promo-section">
+        <div class="promo-header">
+            <span>Promo</span>
+        </div>
+        <table class="promo-table">
+            <tr>
+                <th>Code</th>
+                <th>Offer End Date</th>
+            </tr>
+            <!-- Example Row 1 -->
+            <tr>
+                <td>PROMO5</td>
+                <td>2024-12-31</td>
+            </tr>
+            <!-- Example Row 2 -->
+            <tr>
+                <td>PROMO10</td>
+                <td>2024-11-30</td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+</body>
+</html>

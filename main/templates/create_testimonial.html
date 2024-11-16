@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create Testimonial</title>
+<style>
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f5f5f5;
+        font-family: Arial, sans-serif;
+    }
+
+    .form-container {
+        width: 300px;
+        padding: 20px;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    h2 {
+        margin-bottom: 15px;
+        font-size: 18px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+        text-align: left;
+    }
+
+    label {
+        font-size: 14px;
+        margin-bottom: 5px;
+        display: inline-block;
+    }
+
+    select, textarea, button {
+        width: 100%;
+        padding: 8px;
+        font-size: 14px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+    }
+
+    select {
+        height: 35px;
+    }
+
+    textarea {
+        height: 80px;
+        resize: none;
+    }
+
+    button {
+        margin-top: 10px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    button:hover {
+        background-color: #0056b3;
+    }
+</style>
+</head>
+<body>
+
+<div class="form-container">
+    <h2>Form Testimonial</h2>
+
+    <div class="form-group">
+        <label for="rating">Rating :</label>
+        <select id="rating" required>
+            <option value="" disabled selected>1-10</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="comment">Comment :</label>
+        <textarea id="comment" placeholder="Teks Input" required></textarea>
+    </div>
+
+    <button type="button" id="submitTestimonial">Button Submit</button>
+</div>
+
+<script>
+    document.getElementById("submitTestimonial").addEventListener("click", function() {
+        const rating = document.getElementById("rating").value;
+        const comment = document.getElementById("comment").value;
+
+        if (rating && comment) {
+            alert("Testimonial submitted successfully!\nRating: " + rating + "\nComment: " + comment);
+            window.history.back(); // Retourne à la page précédente
+        } else {
+            alert("Please fill out all fields.");
+        }
+    });
+</script>
+
+</body>
+</html>
