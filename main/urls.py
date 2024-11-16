@@ -1,5 +1,5 @@
 from django.urls import path
-from main.views import show_main, register, login_user, logout_user, home, subcategory, profile, mypay, mypay_transaction, service_job, service_job_status
+from main.views import show_main, register, login_user, logout_user, home, subcategory, profile, service_booking, mypay, mypay_transaction, service_job, service_job_status
 
 app_name = 'main'
 
@@ -15,4 +15,5 @@ urlpatterns = [
     path('mypay-transaction/', mypay_transaction, name='mypay-transaction'),
     path('service-job/', service_job, name='service-job'),
     path('service-job-status/', service_job_status, name='service-job-status'),
+    path('service_booking/', service_booking, name="service_booking")
 ]   

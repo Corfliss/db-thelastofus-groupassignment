@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}
+<title>Service Booking</title>
+{% endblock meta %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto bg-white rounded-xl mt-4">
+    <div class="flex justify-between mb-8">
+        <p class="font-bold p-2 border-4 border-black">Subcategory Name</p>
+        <p class="font-bold p-2 border-4 border-black">Order Status</p>
+        <input 
+        type="text" 
+        placeholder="Search" 
+        class="px-3 py-2 border rounded-md border-slate-300 text-slate-700 focus:outline-none focus:ring-1 focus:ring-slate-500"
+    />
+    </div>
+    <div class="p-2 border-4 border-black flex justify-between mb-2">
+        <div class="flex justify-start">
+            <p class="pr-2 border-r-2 border-black">Subcategory</p>
+            <p class="pl-2 pr-2 border-r-2 border-black">Service Session</p>
+            <p class="pl-2 pr-2 border-r-2 border-black">Price</p>
+            <p class="pl-2 pr-2 border-r-2 border-black">Worker Name</p>
+            <p class="pl-2 border-black">Status</p>
+        </div>
+        <div class="rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2">
+            Cancelled
+        </div>
+    </div>
+    <div class="p-2 border-4 border-black flex justify-between mb-2">
+        <div class="flex justify-start">
+            <p class="pr-2 border-r-2 border-black">Subcategory</p>
+            <p class="pl-2 pr-2 border-r-2 border-black">Service Session</p>
+            <p class="pl-2 pr-2 border-r-2 border-black">Price</p>
+            <p class="pl-2 pr-2 border-r-2 border-black">Worker Name</p>
+            <p class="pl-2 border-black">Status</p>
+        </div>
+        <div class="rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2">
+            Create Testimonial
+        </div>
+    </div>
+    <div class="p-2 border-4 border-black flex justify-between mb-2">
+        <div class="flex justify-start">
+            <p class="pr-2 border-r-2 border-black">Subcategory</p>
+            <p class="pl-2 pr-2 border-r-2 border-black">Service Session</p>
+            <p class="pl-2 pr-2 border-r-2 border-black">Price</p>
+            <p class="pl-2 pr-2 border-r-2 border-black">Worker Name</p>
+            <p class="pl-2 border-black">Status</p>
+        </div>
+    </div>
+</div>
+{% endblock content %}
