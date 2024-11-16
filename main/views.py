@@ -68,9 +68,50 @@ def subcategory(request):
     }
     return render(request, "subcategory.html", context)
 
+@login_required(login_url='/login')
 def profile(request):
     # Might broke something LUL - Corfliss
     context = {
         'title' : 'Sijarta Profile'
     }
     return render(request, "profile.html", context)
+
+@login_required(login_url='/login')
+def mypay(request):
+    past_transactions = [ {'amount': '+50.00', 'date': '2024-11-01', 'category': 'Deposit'},
+            {'amount': '-30.00', 'date': '2024-11-05', 'category': 'Withdrawal'},
+            {'amount': '+100.00', 'date': '2024-11-10', 'category': 'Deposit'},
+            ]
+
+    context = {
+        'user' : request.user,
+        'phone_number': '123-456-789',
+        'balance': 12000,
+        'transactions': past_transactions
+    }
+
+    return render(request, "mypay.html", context)
+
+@login_required(login_url='/login')
+def mypay_transaction(request):
+    context = {
+        'user' : request.user
+    }
+
+    return render(request, "mypaytransaction.html", context)
+
+@login_required(login_url='/login')
+def service_job(request):
+    context = {
+        'user' : request.user
+    }
+
+    return render(request, "servicejob.html", context)
+
+
+def service_job_status(request):
+    context = {
+        'user' : request.user
+    }
+
+    return render(request, "servicejobstatus.html", context)
