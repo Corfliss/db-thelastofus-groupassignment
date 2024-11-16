@@ -55,22 +55,25 @@ def logout_user(request):
     return response
 
 def home(request):
-    # Might broke something LUL - Corfliss
     context = {
         'title' : 'Sijarta Homepage'
     }
     return render(request, "home.html", context)
 
 def subcategory(request):
-    # Might broke something LUL - Corfliss
     context = {
         'title' : 'Sijarta Subcategory'
     }
     return render(request, "subcategory.html", context)
 
 def profile(request):
-    # Might broke something LUL - Corfliss
     context = {
         'title' : 'Sijarta Profile'
     }
     return render(request, "profile.html", context)
+
+def service_booking(request):
+    context = {
+        'title' : 'Sijarta Service Booking'
+    }
+    return render(request, "service_booking.html", context)
