@@ -14,6 +14,7 @@ from main.views import (
     service_job_status,
     create_testimonial,
     discount,
+    myorder,
 )
 
 app_name = "main"
@@ -33,4 +34,5 @@ urlpatterns = [
     path("service_booking/", service_booking, name="service_booking"),
     path("create_testimonial/", create_testimonial, name="create_testimonial"),
     path("discount/", discount, name="discount"),
+    path("myorder/", myorder, name="my-orcer"),
 ]

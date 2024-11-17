@@ -18,7 +18,7 @@ def show_main(request):
         "title": "Welcome to Sijarta",
         "last_login": request.COOKIES["last_login"],
     }
-    return render(request, "main.html", context)
+    return render(request, "home.html", context)
 
 
 def register(request):
@@ -122,3 +122,6 @@ def create_testimonial(request):
 
 def discount(request):
     return render(request, "discount.html")
+
+def myorder(request):
+    return render(request, "myorder.html")

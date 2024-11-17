@@ -1,78 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}
 <title>Discount Page</title>
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        background-color: #f9f9f9;
-        margin: 0;
-        padding: 20px;
-    }
+{% endblock meta %}
 
-    .container {
-        width: 80%;
-        margin: auto;
-        background-color: #fff;
-        padding: 20px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    h2 {
-        text-align: center;
-        margin-bottom: 20px;
-    }
-
-    .voucher-section, .promo-section {
-        margin-bottom: 20px;
-        border: 1px solid #ddd;
-        padding: 15px;
-        border-radius: 8px;
-    }
-
-    .voucher-header, .promo-header {
-        font-weight: bold;
-        margin-bottom: 10px;
-        display: flex;
-        justify-content: space-between;
-    }
-
-    .voucher-table, .promo-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    .voucher-table th, .voucher-table td,
-    .promo-table th, .promo-table td {
-        border: 1px solid #ddd;
-        padding: 10px;
-        text-align: center;
-    }
-
-    .voucher-table th {
-        background-color: #f0f0f0;
-    }
-
-    .buy-btn {
-        padding: 5px 10px;
-        background-color: #007bff;
-        color: #fff;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-
-    .buy-btn:hover {
-        background-color: #0056b3;
-    }
-</style>
-</head>
-<body>
-
+{% block content %}
+{% include 'navbar.html' %}
+{% block style %}
+<link rel="stylesheet" href="{% static 'css/discount.css' %}">
+<body style="padding-top: 70px;">
 <div class="container">
     <h2>Discount</h2>
 
@@ -149,4 +86,5 @@
 </div>
 
 </body>
-</html>
+{% endblock style %}
+{% endblock content %}
