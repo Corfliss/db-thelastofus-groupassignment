@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}
+<title>MyPay Transaction</title>
+<link rel="stylesheet" href="{% static 'css/nice.css' %}">
+{% endblock meta %}
+
+{% block content %}
+<div class="body">
+    <div class="container">
+        <!-- Header Section -->
+        <div class="header">
+            <h1>MyPay Transaction</h1>
+        </div>
+        
+        <!-- Transaction Category Dropdown -->
+        <div class="mb-4">
+            <label for="category-select" class="form-label">Transaction Category</label>
+            <select id="category-select" class="form-select">
+                {% for value, label in categories %}
+                <option value="{{ value }}" {% if value == selected_category %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            {% if not categories %}
+                <p class="text-danger mt-2">Not possible to perform any transactions. Please check your account type with support.</p>
+            {% endif %}
+        </div>
+
+        <!-- Form Area -->
+        <form method="POST" action="">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="row-container">
+                <label for="{{ field.id_for_label }}" class="left-flex-container">
+                  {{ field.label }}
+                </label>
+                <div class="right-flex-container">
+                  {{ field }}
+                </div>
+                {% if field.help_text %}
+                  <p class="text-info">{{ field.help_text }}</p>
+                {% endif %}
+                {% for error in field.errors %}
+                  <p class="text-danger">{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endfor %}
+            {% if selected_category %}
+            <div class="mt-3 text-center">
+                <button type="submit" class="submit-button">Confirm</button>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+<script>
+    // Handle category changes
+    document.getElementById('category-select').addEventListener('change', function() {
+        const selectedCategory = this.value;
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.set('category', selectedCategory);
+        window.location.href = currentUrl.toString(); // Reload the page with the new category
+    });
+</script>
+{% endblock content %}

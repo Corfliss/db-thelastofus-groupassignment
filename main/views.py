@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
 from django.core import serializers
+from .forms import TopUpForm, ServicePaymentForm, TransferForm, WithdrawalForm
 
 import datetime
 
@@ -93,7 +94,51 @@ def mypay(request):
 
 @login_required(login_url="/login")
 def mypay_transaction(request):
-    context = {"user": request.user}
+    account = 'worker' # either user or worker
+    
+    if account == 'user':
+        categories = [
+            ('top_up', 'Top Up MyPay'),
+            ('service_payment', 'Service Payment'),
+            ('transfer', 'Transfer MyPay'),
+            ('withdrawal', 'Withdrawal'),
+        ]
+    elif account == 'worker':
+        categories = [
+            ('top_up', 'Top Up MyPay'),
+            ('transfer', 'Transfer MyPay'),
+            ('withdrawal', 'Withdrawal'),
+        ]
+    else:
+        categories = []
+
+    # get the selected transaction category from the dropdown
+    selected_category = request.GET.get('category', None)  # Default to None
+    # ensure selected category is one of the category options
+    is_valid_category = any(selected_category == category[0] for category in categories)
+    if not is_valid_category:
+        selected_category = None
+
+    form = None
+
+    if selected_category == 'top_up':
+        form = TopUpForm()
+    elif selected_category == 'service_payment':
+        # Fetch services
+        services = [("1", "Service 1 - 500"), ("2", "Service 2 - 3000")]
+        form = ServicePaymentForm()
+        form.fields['service_session'].choices = services
+    elif selected_category == 'transfer':
+        form = TransferForm()
+    elif selected_category == 'withdrawal':
+        form = WithdrawalForm()
+
+    context = {
+               'form': form,
+               'categories': categories,
+               'selected_category': selected_category,
+               'account': account
+               }
 
     return render(request, "mypaytransaction.html", context)
 

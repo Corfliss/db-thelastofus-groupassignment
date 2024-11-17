@@ -60,7 +60,7 @@
   }
 
   
-  .transact-button {
+  .submit-button {
     border: 1px solid #000;
     background: none;
     padding: 5px 15px;
@@ -69,18 +69,17 @@
     height: 30px; 
   }
   
-  /* Transaction History Section */
-  .transaction-history {
+  .table-of-rows {
     margin-top: 20px;
   }
   
-  .transaction-history h2 {
+  .table-of-rows h2 {
     text-align: left;
     font-size: 16px;
     margin-bottom: 10px;
   }
   
-  .transaction {
+  .row-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -105,3 +104,29 @@
     text-align: right;
   }
   
+  /* Additional Styling for Dropdown */
+.form-select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #000;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+/* Error Messages */
+.text-danger {
+  color: red;
+  font-size: 12px;
+}
+
+/* Help Text */
+.text-info {
+  color: #007bff;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+/* Centered Button */
+.text-center {
+  text-align: center;
+}
