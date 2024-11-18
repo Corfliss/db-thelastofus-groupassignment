@@ -10,8 +10,11 @@ from django.urls import reverse
 from django.core import serializers
 from .forms import TopUpForm, ServicePaymentForm, TransferForm, WithdrawalForm, CustomerRegistrationForm, WorkerRegistrationForm
 from .models import CustomUser
-
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
 import datetime
+from .models import Service
 
 
 @login_required(login_url="/landingpage")
@@ -178,13 +181,50 @@ def mypay_transaction(request):
 
 @login_required(login_url="/landingpage")
 def service_job(request):
-    context = {"user": request.user}
+    categories = {
+            'service 1': ['1a', '1b'],
+            'service 2': ['2a', '2b', '2c'],
+    }
+    subcategories = []
+
+    selected_category = 'service 1';
+    if selected_category in categories:
+        subcategories = categories.get(selected_category, [])
+
+    context = {"user": request.user,
+               'categories': categories,
+               'selected_category': selected_category,
+               'subcategories': subcategories
+               }
 
     return render(request, "servicejob.html", context)
 
 
 def service_job_status(request):
-    context = {"user": request.user}
+    statuses = [
+        'Waiting For Worker to Depart',
+        'Arrived At Location',
+        'Providing Service',
+        'Service Completed',
+        'Order Cancelled'
+    ]
+
+    services = [
+        {'subcategory_name': 'hello',
+         'user_name': 'username',
+         'order_date': '2021-12-23',
+         'working_date': '2021-12-26',
+         'session': 'idk',
+         'total_amount': 'money',
+         'status': 'Arrived At Location'
+    }
+    ]
+
+    context = {
+        "user": request.user,
+        'statuses': statuses,
+        'services': services
+    }
 
     return render(request, "servicejobstatus.html", context)
 
@@ -203,6 +243,21 @@ def discount(request):
 
 def myorder(request):
     return render(request, "myorder.html")
+@csrf_exempt
+def update_service_status(request, service_id):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        new_status = data.get('status')
+
+        try:
+            # Update the service object in the database
+            service = Service.objects.get(id=service_id)
+            service.status = new_status
+            service.save()
+            return JsonResponse({'success': True})
+        except Service.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Service not found'}, status=404)
+    return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
 
 def landingpage(request):
     return render(request, "landingpage.html")
