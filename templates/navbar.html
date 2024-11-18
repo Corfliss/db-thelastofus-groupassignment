@@ -13,13 +13,13 @@
             <a href="{% url 'main:home' %}" class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">
               Home
             </a>
-            <a href="#" class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">
+            <a href="{% url 'main:service-job' %}" class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">
               Manage My Jobs
             </a>
-            <a href="#" class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">
+            <a href="{% url 'main:service-job-status' %}" class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">
               Manage Order Status
             </a>
-            <a href="#" class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">
+            <a href="{% url 'main:mypay' %}" class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">
               My Pay
             </a>
           {% else %}
@@ -30,7 +30,7 @@
             <a href="{% url 'main:mypay' %}" class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">
               My Pay
             </a>
-            <a href="#" class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">
+            <a href="{% url 'main:service_booking' %}" class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">
               My Order
             </a>
             <a href="{% url 'main:discount' %}" class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">

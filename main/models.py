@@ -98,6 +98,8 @@ class Worker(models.Model):
         validators=[MinLengthValidator(16), MaxLengthValidator(16)]
     )
 
+    image_url = models.URLField()
+
     def clean(self):
         if self.user.user_type != 'worker':
             raise ValidationError("The user must be a worker.")

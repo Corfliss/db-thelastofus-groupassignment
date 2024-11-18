@@ -6,7 +6,9 @@
 {% endblock meta %}
 
 {% block content %}
-<div class="max-w-3xl mx-auto bg-white rounded-xl mt-4">
+{% include 'navbar.html' %}
+
+<div class="max-w-3xl mx-auto bg-white rounded-xl mt-4" style="padding-top: 70px;">
     <div class="flex justify-between mb-8">
         <p class="font-bold p-2 border-4 border-black">Subcategory Name</p>
         <p class="font-bold p-2 border-4 border-black">Order Status</p>

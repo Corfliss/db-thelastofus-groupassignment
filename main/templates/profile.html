@@ -11,14 +11,16 @@
 <div class="body max-w-3xl mx-auto bg-white rounded-xl" style="padding-top: 100px;">
     <div class="flex flex-col justify-center items-center">
         <h1 class="text-3xl mb-4">My Profile</h1>
-        <img class="rounded-full w-48 h-48 mb-4" src="{% static 'images/maddogsquared.jpg' %}" alt="Test images">
+        <img class="rounded-full w-48 h-48 mb-4"
+             src="{% if user.worker.image_url %}{{ user.worker.image_url }}{% else %}{% static 'images/maddogsquared.jpg' %}{% endif %}"
+             alt="Profile Picture">
         <div class="text-left">
             <p>Name: {{ user.username }}</p>
-            <p>Rate: 11/10</p>
-            <p>Finsihed Order Count: 9</p>
-            <p>phone Number: 08123456789</p>
-            <p>Birth Date: 1987/6/5</p>
-            <p>Address: 2 Eezee Road</p>
+            <p>Level: 5</p>
+            <p>Sex: {{ user.sex }}</p>
+            <p>Phone Number: {{ user.phone_number }}</p>
+            <p>Birth Date: {{ user.birthdate }}</p>
+            <p>Address: {{ user.address }}</p>
         </div>
     </div>
 </div>
