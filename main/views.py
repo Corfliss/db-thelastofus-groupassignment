@@ -105,10 +105,14 @@ def subcategory(request):
 
 
 @login_required(login_url="/landingpage")
-def profile(request):
-    context = {"title": "Sijarta Profile"}
-    return render(request, "profile.html", context)
+def customer_profile(request):
+    context = {"title": "My Profile"}
+    return render(request, "customer_profile.html", context)
 
+@login_required(login_url="/landingpage")
+def worker_profile(request):
+    context = {"title": "My Profile"}
+    return render(request, "worker_profile.html", context)
 
 @login_required(login_url="/landingpage")
 def mypay(request):
@@ -261,3 +265,43 @@ def update_service_status(request, service_id):
 
 def landingpage(request):
     return render(request, "landingpage.html")
+
+def update_customer_profile(request):
+    return render(request, "update_customer_profile.html")
+
+def update_worker_profile(request):
+    return render(request, "update_worker_profile.html")
+
+@login_required(login_url="/landingpage")
+def update_customer_profile(request):
+    customer = request.user
+
+    form = CustomerRegistrationForm(request.POST or None, instance=customer)
+
+    if form.is_valid() and request.method == "POST":
+            form.save()
+            messages.success(request, "Your profile has been updated successfully.")
+            return HttpResponseRedirect(reverse('main:customer-profile'))
+    else:
+        form = CustomerRegistrationForm(instance=customer)
+
+    context = {"form": form}
+    return render(request, "update_customer_profile.html", context)
+
+@login_required(login_url="/landingpage")
+def update_worker_profile(request):
+    worker = request.user
+    if request.method == "POST":
+        form = WorkerRegistrationForm(request.POST, instance=worker)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Your profile has been updated successfully.")
+            return redirect("main:worker-profile")
+    else:
+        form = WorkerRegistrationForm(instance=worker)
+
+    context = {"form": form}
+    return render(request, "update_worker_profile.html", context)
+
+def worker_profile_summary(request):
+    return render(request, "worker_profile_summary.html")

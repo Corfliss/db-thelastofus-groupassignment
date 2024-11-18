@@ -10,10 +10,7 @@
 
 <div class="body max-w-3xl mx-auto bg-white rounded-xl" style="padding-top: 100px;">
     <div class="flex flex-col justify-center items-center">
-        <h1 class="text-3xl mb-4">My Profile</h1>
-        <img class="rounded-full w-48 h-48 mb-4"
-             src="{% if user.worker.image_url %}{{ user.worker.image_url }}{% else %}{% static 'images/maddogsquared.jpg' %}{% endif %}"
-             alt="Profile Picture">
+        <h1 class="text-center text-3xl mb-4 font-extrabold text-black">My Profile</h1>
         <div class="text-left">
             <p>Name: {{ user.username }}</p>
             <p>Level: 5</p>
@@ -21,7 +18,16 @@
             <p>Phone Number: {{ user.phone_number }}</p>
             <p>Birth Date: {{ user.birthdate }}</p>
             <p>Address: {{ user.address }}</p>
+            <p>MyPay Balance:</p>
         </div>
+    </div>
+
+    <!-- Update Profile Button -->
+    <div class="flex justify-center mt-8">
+        <a href="{% url 'main:update-customer-profile' %}" 
+           class="bg-[#2299A8] hover:bg-[#1C677E] text-white font-bold py-2 px-4 rounded transition duration-300">
+            Update Profile
+        </a>
     </div>
 </div>
 {% endblock content %}

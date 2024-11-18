@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}
+<title>Update Customer Profile</title>
+{% endblock meta %}
+
+{% block content %}
+{% include 'navbar.html' %}
+
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8" style="padding-top: 70px;">
+    <div class="max-w-md w-full space-y-8 form-style">
+        <!-- Update Customer Profile Form -->
+        <h2 class="text-center text-3xl font-extrabold text-black">Update Customer Profile</h2>
+        <form class="mt-8 space-y-6" method="POST" action="{% url 'main:update-customer-profile' %}">
+            {% csrf_token %}
+            <div class="rounded-md shadow-sm -space-y-px">
+                {% for field in form %}
+                <div class="{% if not forloop.first %}mt-4{% endif %}">
+                    <label for="{{ field.id_for_label }}" class="mb-2 font-semibold text-black">{{ field.label }}</label>
+                    <div class="relative">{{ field }}</div>
+                    {% if field.errors %}
+                    {% for error in field.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            <div>
+                <button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#2299A8] hover:bg-[#1C677E] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                    Submit
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock content %}
