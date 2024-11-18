@@ -7,7 +7,8 @@ from main.views import (
     logout_user,
     home,
     subcategory,
-    profile,
+    customer_profile,
+    worker_profile,
     service_booking,
     mypay,
     mypay_transaction,
@@ -19,6 +20,9 @@ from main.views import (
     landingpage,
     register_customer,
     register_worker,
+    update_customer_profile,
+    update_worker_profile,
+    worker_profile_summary,
 
 )
 
@@ -31,7 +35,11 @@ urlpatterns = [
     path("logout/", logout_user, name="logout"),
     path("home/", home, name="home"),
     path("subcategory/", subcategory, name="subcategory"),
-    path("profile/", profile, name="profile"),
+    path("customer-profile/", customer_profile, name="customer-profile"),
+    path("worker-profile/", worker_profile, name="worker-profile"),
+    path("worker-profile-summary/", worker_profile_summary, name="worker-profile-summary"),
+    path("update-customer-profile/", update_customer_profile, name="update-customer-profile"),
+    path("update-worker-profile/", update_worker_profile, name="update-worker-profile"),
     path("mypay/", mypay, name="mypay"),
     path("mypay-transaction/", mypay_transaction, name="mypay-transaction"),
     path("service-job/", service_job, name="service-job"),
@@ -43,4 +51,5 @@ urlpatterns = [
     path('landingpage/', landingpage, name='landingpage'),
     path('register_worker/', register_worker, name='register_worker'),
     path('register_customer/', register_customer, name='register_customer'),
+    
 ]

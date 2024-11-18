@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}
+<title>Profile</title>
+{% endblock meta %}
+
+{% block content %}
+{% include 'navbar.html' %}
+
+<div class="body max-w-3xl mx-auto bg-white rounded-xl" style="padding-top: 100px;">
+    <div class="flex flex-col justify-center items-center">
+        <h1 class="text-center text-3xl mb-4 font-extrabold text-black">My Profile</h1>
+        <img class="rounded-full w-48 h-48 mb-4"
+             src="{% if user.worker.image_url %}{{ user.worker.image_url }}{% else %}{% static 'images/maddogsquared.jpg' %}{% endif %}"
+             alt="Profile Picture">
+        <div class="text-left">
+            <p>Name: {{ user.username }}</p>
+            <p>Sex: {{ user.sex }}</p>
+            <p>Phone Number: {{ user.phone_number }}</p>
+            <p>Birth Date: {{ user.birthdate }}</p>
+            <p>Address: {{ user.address }}</p>
+            <p>My Pay Balance : 200,000</p>
+            <p>Bank Name: GoPay</p>
+            <p>Account Number: 1112223333</p>
+            <p>NPWP: 7777666655558888</p>
+            <p>Rate: 9/10</p>
+            <p>Completed Orders Count: 21</p>
+            <p>Job Category:</p>
+            <p>1. Job Category 1</p>
+            <p>2. Job Category 2</p>
+        </div>
+    </div>
+
+    <!-- Update Profile Button -->
+    <div class="flex justify-center mt-8">
+        <a href="{% url 'main:update-worker-profile' %}" 
+           class="bg-[#2299A8] hover:bg-[#1C677E] text-white font-bold py-2 px-4 rounded transition duration-300">
+            Update Profile
+        </a>
+    </div>
+
+</div>
+{% endblock content %}
