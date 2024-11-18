@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block meta %}
+<title>Landing Page</title>
+{% endblock meta %}
+
+{% block content %}
+{% include 'navbar.html' %}
+
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8" style="padding-top: 70px;">
+  <div class="max-w-md w-full space-y-8 form-style">
+    
+    <!-- Greeting card to choose user type -->
+    <div id="user-type-selection">
+      <h2 class="text-center text-3xl font-extrabold text-black">SPARKLEAN by Group 10</h2>
+      <div class="flex justify-center space-x-4 mt-6">
+        <a href="{% url 'main:login' %}" class="text-center bg-[#2299A8] hover:bg-[#1C677E] text-white font-bold py-2 px-4 rounded transition duration-300 mr-2">
+            Login
+        </a>
+        <a href="{% url 'main:register' %}" class="text-center bg-[#2299A8] hover:bg-[#1C677E] text-white font-bold py-2 px-4 rounded transition duration-300">
+            Register
+        </a>
+      </div>
+    </div>
+
+ </div>
+</div>
+
+{% endblock content %}
+

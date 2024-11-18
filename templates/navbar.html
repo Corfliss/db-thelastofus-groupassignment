@@ -1,71 +1,88 @@
-<nav class="bg-[#14a68d] shadow-lg fixed top-0 left-0 z-40 w-screen">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<nav class="bg-[#55C7C8] shadow-lg fixed top-0 left-0 z-40 w-screen">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-1">
     <div class="flex items-center justify-between h-16">
       <div class="flex items-center">
         <h1 class="text-2xl font-bold text-white">SPARKLEAN</h1>
       </div>
+
+      <!-- Navbar Section for Authenticated Users -->
       <div class="hidden md:flex items-center space-x-8">
         {% if user.is_authenticated %}
-          <a href="{% url 'main:home' %}" class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">
-            Home
-          </a>
-          <a href="{% url 'main:mypay' %}" class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">
-            My Pay
-          </a>
-          <a href="#" class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">
-            My Order
-          </a>
-          <a href="{% url 'main:discount' %}" class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">
-            Discount
-          </a>
-          <!-- Dropdown Button for Profile -->
-          <button id="dropdownToggle" class="text-center text-white font-bold py-2 px-4 rounded transition duration-300 inline-flex items-center relative">
-            Profile
-            <svg class="w-4 h-4 ml-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1l4 4 4-4"/>
-            </svg>
-          </button>
-          <!-- Logout Button -->
+          {% if user.user_type == "worker" %}
+            <!-- Worker Navbar -->
+            <a href="{% url 'main:home' %}" class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">
+              Home
+            </a>
+            <a href="#" class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">
+              Manage My Jobs
+            </a>
+            <a href="#" class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">
+              Manage Order Status
+            </a>
+            <a href="#" class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">
+              My Pay
+            </a>
+          {% else %}
+            <!-- Customer Navbar -->
+            <a href="{% url 'main:home' %}" class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">
+              Home
+            </a>
+            <a href="{% url 'main:mypay' %}" class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">
+              My Pay
+            </a>
+            <a href="#" class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">
+              My Order
+            </a>
+            <a href="{% url 'main:discount' %}" class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">
+              Discount
+            </a>
+          {% endif %}
+
+          <!-- Common Dropdown and Logout Button -->
+          <div class="relative inline-block">
+            <!-- Profile Dropdown Button -->
+            <button id="dropdownToggle" class="text-center text-white font-bold py-2 px-4 rounded transition duration-300 inline-flex items-center">
+              Profile
+              <svg class="w-4 h-4 ml-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1l4 4 4-4"/>
+              </svg>
+            </button>
+
+            <!-- Profile Dropdown Menu -->
+            <div id="dropdownMenu" class="hidden absolute bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 z-50 mt-2">
+              <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownToggle">
+                <li>
+                  <span class="block px-4 py-2">{{ user.username }}</span>
+                </li>
+                <li>
+                  <span class="block px-4 py-2">{{ user.user_type }}</span>
+                </li>
+                <li>
+                  <a href="{% url 'main:profile' %}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                    My Profile
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+
           <a href="{% url 'main:logout' %}" class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">
             Logout
           </a>
         {% else %}
-          <a href="{% url 'main:login' %}" class="text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300 mr-2">
+          <!-- Links for Unauthenticated Users -->
+          <a href="{% url 'main:login' %}" class="text-center bg-[#2A9FAE] hover:bg-[#1C677E] text-white font-bold py-2 px-4 rounded transition duration-300 mr-2">
             Login
           </a>
-          <a href="{% url 'main:register' %}" class="text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300">
+          <a href="{% url 'main:register' %}" class="text-center bg-[#2A9FAE] hover:bg-[#1C677E] text-white font-bold py-2 px-4 rounded transition duration-300">
             Register
           </a>
         {% endif %}
       </div>
-      <div class="md:hidden flex items-center">
-        <button class="mobile-menu-button">
-          <svg class="w-6 h-6 text-white" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
-            <path d="M4 6h16M4 12h16M4 18h16"></path>
-          </svg>
-        </button>
-      </div>
     </div>
   </div>
 
-  <!-- Dropdown menu -->
-  <div id="dropdownMenu" class="hidden absolute bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 z-50" style="top: 4rem;">
-    <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownToggle">
-      <li>
-        <span class="block px-4 py-2">{{ user.username }}</span>
-      </li>
-      <li>
-        <span class="block px-4 py-2">Customer</span>
-      </li>
-      <li>
-        <a href="{% url 'main:profile' %}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-          My Profile
-        </a>
-      </li>
-    </ul>
-  </div>
-
-  <!-- Mobile menu -->
+  <!-- Mobile menu for smaller screens -->
   <div class="mobile-menu hidden md:hidden px-4 w-full md:max-w-full">
     <div class="pt-2 pb-3 space-y-1 mx-auto">
       {% if user.is_authenticated %}
@@ -74,10 +91,10 @@
           Logout
         </a>
       {% else %}
-        <a href="{% url 'main:login' %}" class="block text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300 mb-2">
+        <a href="{% url 'main:login' %}" class="block text-center bg-[#2A9FAE] hover:bg-[#1C677E] text-white font-bold py-2 px-4 rounded transition duration-300 mb-2">
           Login
         </a>
-        <a href="{% url 'main:register' %}" class="block text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300">
+        <a href="{% url 'main:register' %}" class="block text-center bg-[#2A9FAE] hover:bg-[#1C677E] text-white font-bold py-2 px-4 rounded transition duration-300">
           Register
         </a>
       {% endif %}
@@ -86,30 +103,21 @@
 </nav>
 
 <script>
-  const mobileMenuButton = document.querySelector("button.mobile-menu-button");
-  const mobileMenu = document.querySelector(".mobile-menu");
-
-  mobileMenuButton.addEventListener("click", () => {
-    mobileMenu.classList.toggle("hidden");
-  });
-
-  // Dropdown Toggle
+document.addEventListener("DOMContentLoaded", () => {
   const dropdownToggle = document.getElementById("dropdownToggle");
   const dropdownMenu = document.getElementById("dropdownMenu");
 
+  // Toggle dropdown on click
   dropdownToggle.addEventListener("click", (event) => {
-    event.stopPropagation(); // Prevents the click from bubbling up to the document
+    event.stopPropagation(); // Prevents closing immediately after opening
     dropdownMenu.classList.toggle("hidden");
-    // Position the dropdown menu below the Profile button
-    const rect = dropdownToggle.getBoundingClientRect();
-    dropdownMenu.style.top = `${rect.bottom + window.scrollY}px`;
-    dropdownMenu.style.left = `${rect.left + window.scrollX}px`;
   });
 
-  // Close dropdown if clicking outside of it
+  // Close dropdown when clicking outside
   document.addEventListener("click", (event) => {
     if (!dropdownMenu.classList.contains("hidden") && !dropdownToggle.contains(event.target)) {
       dropdownMenu.classList.add("hidden");
     }
   });
+});
 </script>

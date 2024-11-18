@@ -8,12 +8,13 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
 from django.core import serializers
-from .forms import TopUpForm, ServicePaymentForm, TransferForm, WithdrawalForm
+from .forms import TopUpForm, ServicePaymentForm, TransferForm, WithdrawalForm, CustomerRegistrationForm, WorkerRegistrationForm
+from .models import CustomUser
 
 import datetime
 
 
-@login_required(login_url="/login")
+@login_required(login_url="/landingpage")
 def show_main(request):
     context = {
         "title": "Welcome to Sijarta",
@@ -21,31 +22,63 @@ def show_main(request):
     }
     return render(request, "home.html", context)
 
-
 def register(request):
-    form = UserCreationForm()
-
-    if request.method == "POST":
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Your account has been successfully created!")
-            return redirect("main:login")
-    context = {"form": form}
+    context = {"title": "Registration Page"}
     return render(request, "register.html", context)
 
+def register_customer(request):
+    if request.method == "POST":
+        form = CustomerRegistrationForm(request.POST)
+        if form.is_valid():
+            # Save user as a Customer
+            user = form.save(commit=False)
+            user.user_type = 'customer'
+            user.save()
+            messages.success(request, "Your account as a Customer has been successfully created!")
+            return redirect("main:login")
+    else:
+        form = CustomerRegistrationForm()
+    
+    context = {"form": form}
+    return render(request, "register_customer.html", context)
+
+
+def register_worker(request):
+    if request.method == "POST":
+        form = WorkerRegistrationForm(request.POST)
+        if form.is_valid():
+            # Save user as a Worker
+            user = form.save(commit=False)
+            user.user_type = 'worker'
+            user.save()
+            messages.success(request, "Your account as a Worker has been successfully created!")
+            return redirect("main:login")
+    else:
+        form = WorkerRegistrationForm()
+
+    context = {"form": form}
+    return render(request, "register_worker.html", context)
 
 def login_user(request):
     if request.method == "POST":
-        form = AuthenticationForm(data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
+        
+        phone_number = request.POST.get('phonenumber')
+        password = request.POST.get('password')
+
+        
+        user = authenticate(request, phone_number=phone_number, password=password)
+
+        if user is not None:
             login(request, user)
-            response = HttpResponseRedirect(reverse("main:show_main"))
-            response.set_cookie("last_login", str(datetime.datetime.now()))
+            response = HttpResponseRedirect(reverse("main:show_main"))  
+            response.set_cookie("last_login", str(datetime.datetime.now())) 
             return response
+        else:
+            
+            messages.error(request, "Invalid phone number or password.")
+
     else:
-        form = AuthenticationForm()  # Ensure form is initialized for GET requests
+        form = AuthenticationForm()
 
     context = {"form": form}
     return render(request, "login.html", context)
@@ -68,13 +101,13 @@ def subcategory(request):
     return render(request, "subcategory.html", context)
 
 
-@login_required(login_url="/login")
+@login_required(login_url="/landingpage")
 def profile(request):
     context = {"title": "Sijarta Profile"}
     return render(request, "profile.html", context)
 
 
-@login_required(login_url="/login")
+@login_required(login_url="/landingpage")
 def mypay(request):
     past_transactions = [
         {"amount": "+50.00", "date": "2024-11-01", "category": "Deposit"},
@@ -92,7 +125,7 @@ def mypay(request):
     return render(request, "mypay.html", context)
 
 
-@login_required(login_url="/login")
+@login_required(login_url="/landingpage")
 def mypay_transaction(request):
     account = 'worker' # either user or worker
     
@@ -143,7 +176,7 @@ def mypay_transaction(request):
     return render(request, "mypaytransaction.html", context)
 
 
-@login_required(login_url="/login")
+@login_required(login_url="/landingpage")
 def service_job(request):
     context = {"user": request.user}
 
@@ -170,3 +203,6 @@ def discount(request):
 
 def myorder(request):
     return render(request, "myorder.html")
+
+def landingpage(request):
+    return render(request, "landingpage.html")

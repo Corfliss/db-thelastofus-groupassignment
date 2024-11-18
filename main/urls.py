@@ -1,4 +1,5 @@
 from django.urls import path
+from . import views
 from main.views import (
     show_main,
     register,
@@ -15,6 +16,10 @@ from main.views import (
     create_testimonial,
     discount,
     myorder,
+    landingpage,
+    register_customer,
+    register_worker,
+
 )
 
 app_name = "main"
@@ -35,4 +40,7 @@ urlpatterns = [
     path("create_testimonial/", create_testimonial, name="create_testimonial"),
     path("discount/", discount, name="discount"),
     path("myorder/", myorder, name="my-orcer"),
+    path('landingpage/', landingpage, name='landingpage'),
+    path('register_worker/', register_worker, name='register_worker'),
+    path('register_customer/', register_customer, name='register_customer'),
 ]
