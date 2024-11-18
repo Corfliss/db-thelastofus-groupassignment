@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}
+<title>Service Job Status</title>
+<link rel="stylesheet" href="{% static 'css/nice.css' %}">
+{% endblock meta %}
+
+{% block content %}
+{% include 'navbar.html' %}
+
+<div class="body">
+<div class="container">
+    <!-- Filter Section -->
+    <form method="GET" action="" class="filter-form">
+        <div class="header">
+            
+            <!-- Filter by Service Category -->
+            <select name="status" class="form-select">
+                <option value="">Category</option>
+                {% for category in categories %}
+                <option value="{{ category }}" {% if category == request.GET.category %}selected{% endif %}>
+                    {{ category }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <!-- Filter by Service Subcategory -->
+            <select name="status" class="form-select">
+                <option value="">Subcategory</option>
+                {% for subcategory in subcategories %}
+                <option value="{{ subcategory }}" {% if subcateogry == request.GET.subcategory %}selected{% endif %}>
+                    {{ subcategory }}
+                </option>
+                {% endfor %}
+            </select>
+            
+            <!-- Search Button -->
+            <button type="submit" class="right-flex-container action-btn">Search</button>
+        </div>
+    </form>
+
+    <!-- Services Section -->
+    <div class="table-section">
+        <div class="table-header">
+            <span>Service Details</span>
+        </div>
+        <table class="my-table">
+            <tr>
+                <th>Service Subcategory Name</th>
+                <th>User's Name</th>
+                <th>Order Date</th>
+                <th>Working Date</th>
+                <th>Session</th>
+                <th>Total Amout</th>
+                <th>Accept Order</th>
+            </tr>
+            {% for service in services %}
+            <tr>
+              <td>{{ service.subcategory_name }}</td>
+              <td>{{ service.user_name }}</td>
+              <td>{{ service.order_date }}</td>
+              <td>{{ service.working_date }}</td>
+              <td>{{ service.session }}</td>
+              <td>{{ service.total_amount }}</td>
+              <td>
+                <button 
+                  class="update-button" 
+                  onclick="">
+                  Accept Order
+                </button>
+              </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+</div>
+{% endblock content %}

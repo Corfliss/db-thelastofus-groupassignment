@@ -11,13 +11,33 @@
 
 <div class="body max-w-3xl mx-auto bg-white rounded-xl" style="padding-top: 70px;">
   <div class="container">
-    <div class="header">
+    <div class="header table-section">
       <div class="space-between">
         <div class="left-flex-container">Phone Number: {{ phone_number }}</div>
         <div class="right-flex-container">Balance: ${{ balance }}</div>
       </div>
-      <a href="{% url 'main:mypay-transaction' %}" class="submit-button">Transact</a>
+      <a href="{% url 'main:mypay-transaction' %}" class="action-btn">Transact</a>
     </div>
+    <div class="table-section">
+      <div class="table-header">
+          <span>Transaction History</span>
+      </div>
+      <table class="my-table">
+          <tr>
+              <th>Transaction Amount</th>
+              <th>Date</th>
+              <th>Category</th>
+          </tr>
+          {% for transaction in transactions %}
+          <tr>
+            <td>{{ transaction.amount }}</td>
+            <td>{{ transaction.date }}</td>
+            <td>{{ transaction.category }}</td>
+          </tr>
+          {% endfor %}
+      </table>
+    </div>
+    <!-- old
     <div class="table-of-rows">
       <h2>Transaction History</h2>
       {% for transaction in transactions %}
@@ -28,6 +48,7 @@
       </div>
       {% endfor %}
     </div>
+    -->
   </div>
 </div>
 {% endblock content %}
