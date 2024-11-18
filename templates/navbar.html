@@ -1,5 +1,5 @@
 <nav class="bg-[#55C7C8] shadow-lg fixed top-0 left-0 z-40 w-screen">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-1">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0">
     <div class="flex items-center justify-between h-16">
       <div class="flex items-center">
         <h1 class="text-2xl font-bold text-white">SPARKLEAN</h1>
@@ -10,6 +10,12 @@
         {% if user.is_authenticated %}
           {% if user.user_type == "worker" %}
             <!-- Worker Navbar -->
+            <a>
+              <span class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">{{ user.user_type }}</span>
+            </a>
+            <a>
+              <span class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">{{ user.username }}</span>
+            </a>
             <a href="{% url 'main:home' %}" class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">
               Home
             </a>
@@ -22,8 +28,17 @@
             <a href="{% url 'main:mypay' %}" class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">
               My Pay
             </a>
+            <a href="{% url 'main:profile' %}" class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">
+              Profile
+            </a>
           {% else %}
             <!-- Customer Navbar -->
+            <a>
+              <span class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">{{ user.user_type }}</span>
+            </a>
+            <a>
+              <span class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">{{ user.username }}</span>
+            </a>
             <a href="{% url 'main:home' %}" class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">
               Home
             </a>
@@ -36,36 +51,10 @@
             <a href="{% url 'main:discount' %}" class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">
               Discount
             </a>
-          {% endif %}
-
-          <!-- Common Dropdown and Logout Button -->
-          <div class="relative inline-block">
-            <!-- Profile Dropdown Button -->
-            <button id="dropdownToggle" class="text-center text-white font-bold py-2 px-4 rounded transition duration-300 inline-flex items-center">
+            <a href="{% url 'main:profile' %}" class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">
               Profile
-              <svg class="w-4 h-4 ml-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1l4 4 4-4"/>
-              </svg>
-            </button>
-
-            <!-- Profile Dropdown Menu -->
-            <div id="dropdownMenu" class="hidden absolute bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 z-50 mt-2">
-              <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownToggle">
-                <li>
-                  <span class="block px-4 py-2">{{ user.username }}</span>
-                </li>
-                <li>
-                  <span class="block px-4 py-2">{{ user.user_type }}</span>
-                </li>
-                <li>
-                  <a href="{% url 'main:profile' %}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                    My Profile
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-
+            </a>
+          {% endif %}
           <a href="{% url 'main:logout' %}" class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">
             Logout
           </a>
@@ -101,23 +90,3 @@
     </div>
   </div>
 </nav>
-
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const dropdownToggle = document.getElementById("dropdownToggle");
-  const dropdownMenu = document.getElementById("dropdownMenu");
-
-  // Toggle dropdown on click
-  dropdownToggle.addEventListener("click", (event) => {
-    event.stopPropagation(); // Prevents closing immediately after opening
-    dropdownMenu.classList.toggle("hidden");
-  });
-
-  // Close dropdown when clicking outside
-  document.addEventListener("click", (event) => {
-    if (!dropdownMenu.classList.contains("hidden") && !dropdownToggle.contains(event.target)) {
-      dropdownMenu.classList.add("hidden");
-    }
-  });
-});
-</script>
