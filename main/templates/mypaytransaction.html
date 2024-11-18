@@ -12,12 +12,12 @@
     <div class="container">
         <!-- Header Section -->
         <div class="header">
-            <h1>MyPay Transaction</h1>
+            MyPay Transaction
         </div>
         
         <!-- Transaction Category Dropdown -->
         <div class="mb-4">
-            <label for="category-select" class="form-label">Transaction Category</label>
+            <label for="category-select">Transaction Category</label>
             <select id="category-select" class="form-select">
                 {% for value, label in categories %}
                 <option value="{{ value }}" {% if value == selected_category %}selected{% endif %}>{{ label }}</option>
@@ -40,7 +40,7 @@
                   {{ field }} 
                 </div>
                 {% if field.help_text %}
-                  hello <p class="text-info">{{ field.help_text }}</p>
+                  <p class="text-info">{{ field.help_text }}</p>
                 {% endif %}
                 {% for error in field.errors %}
                   <p class="text-danger">{{ error }}</p>

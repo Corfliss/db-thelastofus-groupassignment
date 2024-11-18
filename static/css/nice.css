@@ -23,6 +23,7 @@
     margin-bottom: 20px;
     font-weight: bold;
     width: 100%;
+    font-family: Arial, sans-serif;
   }
   
   .space-between {
@@ -208,7 +209,6 @@ h2 {
 }
 
 label {
-  font-size: 14px;
   margin-bottom: 5px;
   display: inline-block;
 }

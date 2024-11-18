@@ -130,9 +130,10 @@ def mypay(request):
 
 @login_required(login_url="/landingpage")
 def mypay_transaction(request):
-    account = 'worker' # either user or worker
+    current_user = request.user
+    account = current_user.user_type.lower() # either user or worker
     
-    if account == 'user':
+    if account == 'customer':
         categories = [
             ('top_up', 'Top Up MyPay'),
             ('service_payment', 'Service Payment'),
@@ -243,6 +244,7 @@ def discount(request):
 
 def myorder(request):
     return render(request, "myorder.html")
+
 @csrf_exempt
 def update_service_status(request, service_id):
     if request.method == 'POST':
