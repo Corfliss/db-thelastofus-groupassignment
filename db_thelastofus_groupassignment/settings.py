@@ -35,7 +35,7 @@ if not SECRET_KEY:
 #DEBUG = not PRODUCTION
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "db-thelastofus-groupassignment.onrender.com"]
 
 
 # Application definition
