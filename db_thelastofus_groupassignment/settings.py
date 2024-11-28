@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-unsi_jj4+$5(r7s-*q!-jcu53_2_0@wfajk0dx9%8-fwh@9qt6
 PRODUCTION = os.getenv("PRODUCTION", False)
 DEBUG = not PRODUCTION
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".railway.app"]
 
 
 # Application definition
@@ -81,8 +81,12 @@ WSGI_APPLICATION = 'db_thelastofus_groupassignment.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.dummy',  # Use dummy since ORM won't be used
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
     }
 }
 
