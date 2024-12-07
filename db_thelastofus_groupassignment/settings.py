@@ -88,7 +88,14 @@ WSGI_APPLICATION = 'db_thelastofus_groupassignment.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    'default': dj_database_url.config(default=config('DATABASE_URL'))
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',  
+        'USER': 'postgres.fuhqmowfreadirspzmnk',  
+        'PASSWORD': 'basdatlastofus3',  
+        'HOST': 'aws-0-us-east-1.pooler.supabase.com',  
+        'PORT': '6543',  
+    }
 }
 
 
