@@ -3,14 +3,16 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.hashers import make_password, check_password
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
 from django.core import serializers
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+
 import json
 import datetime
-from .models import service_session
+from .models import Service, Customer, Worker
 from django.shortcuts import render
 
 
@@ -27,45 +29,108 @@ def register(request):
     return render(request, "register.html", context)
 
 def register_customer(request):
-    if request.method == "POST":
-        form = CustomerRegistrationForm(request.POST)
-        if form.is_valid():
-            # Save user as a Customer
-            user = form.save(commit=False)
-            user.user_type = 'customer'
-            user.save()
-            messages.success(request, "Your account as a Customer has been successfully created!")
-            return redirect("main:login")
-    else:
-        form = CustomerRegistrationForm()
+    if request.method == 'POST':
+        name = request.POST['name']
+        sex = request.POST['sex']
+        phone_number = request.POST['phone_number']
+        password = make_password(request.POST['password'])
+        birthdate = request.POST['birthdate']
+        address = request.POST['address']
+        
+        Customer.objects.create(
+            name = name,
+            sex = sex,
+            phone_number = phone_number,
+            password = password,
+            birthdate = birthdate,
+            address = address
+        )
+
+        # For debugging
+        messages.success(request, "Customer registration successful!")
+        return redirect('login_user')
+
+    # TODO: Check if the render is fine for customer
+    return render(request, 'register_customer.html')
+
+    # Previous code
+    # 
+    # if request.method == "POST":
+    #     form = CustomerRegistrationForm(request.POST)
+    #     if form.is_valid():
+    #         # Save user as a Customer
+    #         user = form.save(commit=False)
+    #         user.user_type = 'customer'
+    #         user.save()
+    #         messages.success(request, "Your account as a Customer has been successfully created!")
+    #         return redirect("main:login")
+    # else:
+    #     form = CustomerRegistrationForm()
     
-    context = {"form": form}
-    return render(request, "register_customer.html", context)
+    # context = {"form": form}
+    # return render(request, "register_customer.html", context)
 
 
 def register_worker(request):
-    if request.method == "POST":
-        form = WorkerRegistrationForm(request.POST)
-        if form.is_valid():
-            # Save user as a Worker
-            user = form.save(commit=False)
-            user.user_type = 'worker'
-            user.save()
-            messages.success(request, "Your account as a Worker has been successfully created!")
-            return redirect("main:login")
-    else:
-        form = WorkerRegistrationForm()
+    if request.method == 'POST':
+        name = request.POST['name']
+        sex = request.POST['sex']
+        phone_number = request.POST['phone_number']
+        password = make_password(request.POST['password'])
+        birthdate = request.POST['birthdate']
+        address = request.POST['address']
 
-    context = {"form": form}
-    return render(request, "register_worker.html", context)
+        # Additional parameters to be filled for worker
+        bank_name = request.POST['bank_name']
+        account_number = request.POST['account_number']
+        npwp = request.POST['npwp']
+        avatar_url = request.POST['avatar_url']
 
+        Worker.objects.create(
+            name = name,
+            sex = sex,
+            phone_number = phone_number,
+            password = password,
+            birthdate = birthdate,
+            address = address,
+            bank_name = bank_name,
+            account_number = account_number,
+            npwp = npwp,
+            avatar_url = avatar_url
+        )
+
+        # For debugging
+        messages.success(request, "Worker registration successful!")
+        return redirect('login_user')
+
+    # TODO: Check if the render is fine for customer
+    return render(request, 'register_worker.html')
+
+    # Previous code
+    # 
+    # if request.method == "POST":
+    #     form = WorkerRegistrationForm(request.POST)
+    #     if form.is_valid():
+    #         # Save user as a Worker
+    #         user = form.save(commit=False)
+    #         user.user_type = 'worker'
+    #         user.save()
+    #         messages.success(request, "Your account as a Worker has been successfully created!")
+    #         return redirect("main:login")
+    # else:
+    #     form = WorkerRegistrationForm()
+
+    # context = {"form": form}
+    # return render(request, "register_worker.html", context)
+
+
+# TODO: For Corfliss, refactor this to make sure it matched the models in models.py
 def login_user(request):
     if request.method == "POST":
         
         phone_number = request.POST.get('phonenumber')
         password = request.POST.get('password')
 
-        
         user = authenticate(request, phone_number=phone_number, password=password)
 
         if user is not None:
@@ -78,10 +143,13 @@ def login_user(request):
             messages.error(request, "Invalid phone number or password.")
 
     else:
-        form = AuthenticationForm()
+        # For now, pass
+        pass
+        # What should I change for this?
+        # form = AuthenticationForm()
 
-    context = {"form": form}
-    return render(request, "login.html", context)
+    # context = {"form": form}
+    return render(request, "login.html") #, context)
 
 
 def logout_user(request):
@@ -129,6 +197,7 @@ def mypay(request):
     return render(request, "mypay.html", context)
 
 
+# TODO: Refactor to match the models
 @login_required(login_url="/landingpage")
 def mypay_transaction(request):
     current_user = request.user
@@ -254,11 +323,11 @@ def update_service_status(request, service_id):
 
         try:
             # Update the service object in the database
-            service = service_session.objects.get(id=service_id)
+            service = Service.objects.get(id=service_id)
             service.status = new_status
             service.save()
             return JsonResponse({'success': True})
-        except service_session.DoesNotExist:
+        except Service.DoesNotExist:
             return JsonResponse({'success': False, 'error': 'Service not found'}, status=404)
     return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
 

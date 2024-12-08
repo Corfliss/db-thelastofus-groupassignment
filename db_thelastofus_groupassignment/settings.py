@@ -11,10 +11,10 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
-import os
 from decouple import config
-import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
+# This line is not needed for now # import dj_database_url
+# This line is not needed for now # import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 #SECRET_KEY = 'django-insecure-unsi_jj4+$5(r7s-*q!-jcu53_2_0@wfajk0dx9%8-fwh@9qt6'
 
-SECRET_KEY = os.getenv('SECRET_KEY','django-insecure-unsi_jj4+$5(r7s-*q!-jcu53_2_0@wfajk0dx9%8-fwh@9qt6')
+SECRET_KEY = config('SECRET_KEY')
 if not SECRET_KEY:
     raise ImproperlyConfigured("The SECRET_KEY environment variable is not set!")
 
@@ -49,6 +49,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'main',
 ]
+
+AUTH_USER_MODEL = ["main.Customer", "main.Worker"]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
