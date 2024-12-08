@@ -14,6 +14,7 @@ from pathlib import Path
 import os
 from decouple import config
 import dj_database_url
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,14 +25,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 #SECRET_KEY = 'django-insecure-unsi_jj4+$5(r7s-*q!-jcu53_2_0@wfajk0dx9%8-fwh@9qt6'
-SECRET_KEY = config('SECRET_KEY')
+
+SECRET_KEY = os.getenv('SECRET_KEY','django-insecure-unsi_jj4+$5(r7s-*q!-jcu53_2_0@wfajk0dx9%8-fwh@9qt6')
+if not SECRET_KEY:
+    raise ImproperlyConfigured("The SECRET_KEY environment variable is not set!")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 #PRODUCTION = os.getenv("PRODUCTION", False)
 #DEBUG = not PRODUCTION
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "db-thelastofus-groupassignment.onrender.com"]
 
 
 # Application definition
@@ -45,8 +49,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'main',
 ]
-
-AUTH_USER_MODEL = "main.CustomUser"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -85,10 +87,13 @@ WSGI_APPLICATION = 'db_thelastofus_groupassignment.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',  
+        'USER': 'postgres.fuhqmowfreadirspzmnk',  
+        'PASSWORD': 'basdatlastofus3',  
+        'HOST': 'aws-0-us-east-1.pooler.supabase.com',  
+        'PORT': '6543',  
     }
-    #'default': dj_database_url.config(default=config('DATABASE_URL'))
 }
 
 
