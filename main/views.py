@@ -1,20 +1,17 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse
 from django.core import serializers
-from .forms import TopUpForm, ServicePaymentForm, TransferForm, WithdrawalForm, CustomerRegistrationForm, WorkerRegistrationForm
-from .models import CustomUser
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 import datetime
-from .models import Service
+from .models import service_session
+from django.shortcuts import render
 
 
 @login_required(login_url="/landingpage")
@@ -257,11 +254,11 @@ def update_service_status(request, service_id):
 
         try:
             # Update the service object in the database
-            service = Service.objects.get(id=service_id)
+            service = service_session.objects.get(id=service_id)
             service.status = new_status
             service.save()
             return JsonResponse({'success': True})
-        except Service.DoesNotExist:
+        except service_session.DoesNotExist:
             return JsonResponse({'success': False, 'error': 'Service not found'}, status=404)
     return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
 
