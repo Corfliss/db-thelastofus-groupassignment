@@ -56,7 +56,7 @@ def register_customer(request):
         password = make_password(request.POST['password'])
         birthdate = request.POST['birthdate']
         address = request.POST['address']
-        
+        '''
         Customer.objects.create(
             name = name,
             sex = sex,
@@ -65,7 +65,6 @@ def register_customer(request):
             birthdate = birthdate,
             address = address
         )
-        '''
 
         # For debugging
         messages.success(request, "Customer registration successful!")
@@ -144,15 +143,12 @@ def register_worker(request):
     # context = {"form": form}
     # return render(request, "register_worker.html", context)
 
-
-# TODO: For Corfliss, refactor this to make sure it matched the models in models.py
 def login_user(request):
     if request.method == "POST":
         
-        phone_number = request.POST.get('phonenumber')
-        password = request.POST.get('password')
-
-        user = authenticate(request, phone_number=phone_number, password=password)
+        phone_number = request.POST['phone_number']
+        checked_password = check_password(request.POST['password'])
+        user = authenticate(request, phone_number=phone_number, password=checked_password)
 
         if user is not None:
             login(request, user)
@@ -160,17 +156,20 @@ def login_user(request):
             response.set_cookie("last_login", str(datetime.datetime.now())) 
             return response
         else:
-            
             messages.error(request, "Invalid phone number or password.")
 
-    else:
+    return render(request, "login.html")
+
+    # Old Code
+    # else:
         # For now, pass
-        pass
+        # pass
         # What should I change for this?
+        # Update: actually, let it go
         # form = AuthenticationForm()
 
     # context = {"form": form}
-    return render(request, "login.html") #, context)
+    # return render(request, "login.html", context)
 
 
 def logout_user(request):
@@ -181,11 +180,47 @@ def logout_user(request):
 
 
 def home(request):
-    context = {"title": "Sijarta Homepage"}
+    user = request.user
+     
+    category_subcategory = """
+        SELECT 
+            sc.SCId AS CategoryId,
+            sc.Name AS CategoryName,
+            ssc.SSCId AS SubcategoryId,
+            ssc.Name AS SubcategoryName,
+            ssc.Description AS SubcategoryDescription
+        FROM 
+            service_category sc
+        JOIN 
+            service_subcategory ssc
+        ON 
+            sc.SCId = ssc.SCId
+        ORDER BY 
+            sc.Name, ssc.Name;
+    """
+    params = [user]
+    category_subcategory_result = execute_sql_query(category_subcategory, params)
+
+    context = {
+        "title": "Sijarta Homepage",
+        "user": user,
+        "category_subcategory_list": category_subcategory_result,
+    }
+
+    print(category_subcategory_result)
+
     return render(request, "home.html", context)
 
 
 def subcategory(request):
+    # TODO: Continue this later
+    # user = request.user
+    # if hasattr(user, 'customer'):
+    #     customer = user.customer
+    # elif hasattr(user, 'worker'):
+    #     worker = user.worker
+
+    
     context = {"title": "Sijarta Subcategory"}
     return render(request, "subcategory.html", context)
 
@@ -202,7 +237,9 @@ def worker_profile(request):
 
 @login_required(login_url="/landingpage")
 def mypay(request):
-    user_id = 'USR00' # should be based on request
+    # user_id = 'USR00' # should be based on request
+    # Proposed solution:
+    user_id = request.user
      
     user_query = """
         SELECT "PhoneNum", "MyPayBalance", "Username", "UserId"
