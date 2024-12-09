@@ -15,6 +15,18 @@ import datetime
 from .models import Service, Customer, Worker
 from django.shortcuts import render
 
+from django.db import connection
+from django.http import JsonResponse
+
+def execute_sql_query(query, params=None):
+    """Helper function to execute raw SQL queries."""
+    with connection.cursor() as cursor:
+        cursor.execute(query, params)
+        if cursor.description:  # Check if the query returns data
+            columns = [col[0] for col in cursor.description]
+            results = [dict(zip(columns, row)) for row in cursor.fetchall()]
+            return results
+        return None
 
 @login_required(login_url="/landingpage")
 def show_main(request):
@@ -30,6 +42,14 @@ def register(request):
 
 def register_customer(request):
     if request.method == 'POST':
+        # temporary while there is no register user data
+        name = 'Dave'
+        sex = 'M'
+        phone_number = '1234567890'
+        password = make_password('Dave1234')
+        birthdate = '2000-09-10'
+        address = 'Street 1, LA'
+        '''
         name = request.POST['name']
         sex = request.POST['sex']
         phone_number = request.POST['phone_number']
@@ -45,6 +65,7 @@ def register_customer(request):
             birthdate = birthdate,
             address = address
         )
+        '''
 
         # For debugging
         messages.success(request, "Customer registration successful!")
@@ -181,18 +202,34 @@ def worker_profile(request):
 
 @login_required(login_url="/landingpage")
 def mypay(request):
-    past_transactions = [
-        {"amount": "+50.00", "date": "2024-11-01", "category": "Deposit"},
-        {"amount": "-30.00", "date": "2024-11-05", "category": "Withdrawal"},
-        {"amount": "+100.00", "date": "2024-11-10", "category": "Deposit"},
-    ]
+    user_id = 'USR00' # should be based on request
+     
+    user_query = """
+        SELECT "PhoneNum", "MyPayBalance", "Username", "UserId"
+        FROM "user"
+        WHERE "UserId" = %s
+    """
+    params = [user_id]
+    user_result = execute_sql_query(user_query, params)
+
+    transactions_query = """
+        SELECT t."Nominal", t."Date", t."MyPayId", c."Name"
+        FROM tr_mypay t
+        JOIN tr_mypay_category c ON t."CategoryId" = c."MyPayCatId"
+        WHERE t."UserId" = %s
+        ORDER BY t."Date" DESC 
+    """
+    params = [user_id]
+    transactions_result = execute_sql_query(transactions_query, params)
 
     context = {
         "user": request.user,
-        "phone_number": "123-456-789",
-        "balance": 12000,
-        "transactions": past_transactions,
+        "user_info": user_result[0],
+        "transactions": transactions_result,
     }
+
+    print(user_result)
+    print(transactions_result)
 
     return render(request, "mypay.html", context)
 

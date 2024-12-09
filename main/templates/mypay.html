@@ -13,8 +13,8 @@
   <div class="container">
     <div class="header table-section">
       <div class="space-between">
-        <div class="left-flex-container">Phone Number: {{ phone_number }}</div>
-        <div class="right-flex-container">Balance: ${{ balance }}</div>
+        <div class="left-flex-container">Phone Number: {{ user_info.PhoneNum }}</div>
+        <div class="right-flex-container">Balance: ${{ user_info.MyPayBalance }}</div>
       </div>
       <a href="{% url 'main:mypay-transaction' %}" class="action-btn">Transact</a>
     </div>
@@ -30,9 +30,9 @@
           </tr>
           {% for transaction in transactions %}
           <tr>
-            <td>{{ transaction.amount }}</td>
-            <td>{{ transaction.date }}</td>
-            <td>{{ transaction.category }}</td>
+            <td>{{ transaction.Nominal }}</td>
+            <td>{{ transaction.Date }}</td>
+            <td>{{ transaction.Name }}</td>
           </tr>
           {% endfor %}
       </table>
