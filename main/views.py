@@ -234,57 +234,263 @@ def mypay(request):
     return render(request, "mypay.html", context)
 
 
-# TODO: Refactor to match the models
 @login_required(login_url="/landingpage")
 def mypay_transaction(request):
-    current_user = request.user
-    account = current_user.user_type.lower() # either user or worker
     
+    user_id = 'USR00' # TODO should be based on request
+    account = None
+     
+    # try to query userid in customer
+    customer_query = """
+        SELECT *
+        FROM customer
+        WHERE "CustomerId" = %s
+    """
+    customer_result = execute_sql_query(customer_query, [user_id])
+    if len(customer_result) > 0:
+        account = 'customer'
+    
+    # else try to query userid in worker
+    else:
+        worker_query = """
+            SELECT *
+            FROM worker
+            WHERE "WorkerId" = %s
+        """
+        worker_result = execute_sql_query(worker_query, [user_id])
+        if len(customer_result) > 0:
+            account = 'worker'
+
+    # if doesn't exist, then user neither customer nor worker
+    
+    # organize the service categories
+    categories = []
+    services = []
     if account == 'customer':
         categories = [
-            ('top_up', 'Top Up MyPay'),
-            ('service_payment', 'Service Payment'),
-            ('transfer', 'Transfer MyPay'),
-            ('withdrawal', 'Withdrawal'),
+            ('Top Up'),
+            ('Service Payment'),
+            ('Transfer'),
+            ('Withdrawal'),
         ]
+
+        # query service orders that have not yet been paid
+        services = []
+
+        service_query = """
+                    SELECT o."Id", ssc."Name", o."Session", o."TotalPrice"
+                    FROM tr_service_order o
+                    JOIN tr_order_status ts ON o."Id" = ts."ServiceTrId"
+                    JOIN order_status s ON ts."StatusId" = s."StatusId"
+                    JOIN service_subcategory ssc ON o."ServiceCategoryId" = ssc."SSCId"
+                    WHERE o."CustomerId" = %s
+                    AND s."Status" = %s
+                    """
+        services = execute_sql_query(service_query, [user_id, "Waiting for Payment"])
+        print(services)
+
     elif account == 'worker':
         categories = [
-            ('top_up', 'Top Up MyPay'),
-            ('transfer', 'Transfer MyPay'),
-            ('withdrawal', 'Withdrawal'),
+            ('Top Up'),
+            ('Transfer'),
+            ('Withdrawal'),
         ]
-    else:
-        categories = []
-
-    # get the selected transaction category from the dropdown
-    selected_category = request.GET.get('category', None)  # Default to None
-    # ensure selected category is one of the category options
-    is_valid_category = any(selected_category == category[0] for category in categories)
-    if not is_valid_category:
-        selected_category = None
-
-    form = None
-
-    if selected_category == 'top_up':
-        form = TopUpForm()
-    elif selected_category == 'service_payment':
-        # Fetch services
-        services = [("1", "Service 1 - 500"), ("2", "Service 2 - 3000")]
-        form = ServicePaymentForm()
-        form.fields['service_session'].choices = services
-    elif selected_category == 'transfer':
-        form = TransferForm()
-    elif selected_category == 'withdrawal':
-        form = WithdrawalForm()
-
+    
     context = {
-               'form': form,
-               'categories': categories,
-               'selected_category': selected_category,
-               'account': account
-               }
+        'states': categories,
+        'services': services
+    }
 
-    return render(request, "mypaytransaction.html", context)
+    if request.method == 'POST':
+        print("POST request triggered")
+
+        state = request.POST.get('state')
+        user_id = 'USR00' # should be based on request
+
+        try:
+            # Handle each state
+            if state == 'Top Up':
+                print("MyPay Top Up")
+                amount = float(request.POST.get('top_up_amount'))
+                if amount <= 0:
+                    raise ValueError("Top-up amount must be positive.")
+                
+                # increase user's MyPay balance
+                query = """
+                    UPDATE "user"
+                    SET "MyPayBalance" = "MyPayBalance" + %s
+                    WHERE "UserId" = %s
+                """
+                #execute_sql_query(query, [amount, user_id])
+
+                # Add transaction to tr_mypay
+                query = """
+                    INSERT INTO tr_mypay (UserId, Date, Nominal, CategoryId)
+                    VALUES (%s, CURRENT_DATE, %s, %s)
+                """
+                params = [user_id, amount, "MPC00"]
+                #execute_sql_query(query, params)
+
+            elif state == 'Service Payment':
+                service_id = request.POST.get('service_id')
+                amount_due = float(request.POST.get('service_price'))
+                print("MyPay Service Payment id: ", service_id)
+
+                service_query = """
+                    SELECT o."Id", o."TotalPrice", p."Name"
+                    FROM tr_service_order o
+                    JOIN payment_method p ON o."PaymentMethodId" = p."PaymentMethodId"
+                    WHERE o."Id" = %s
+                    """
+                services = execute_sql_query(service_query, [service_id])
+
+                if len(services) == 0:
+                    raise ValueError("Cannot pay for this service.")
+                
+                amount_due = services[0]["TotalPrice"]
+                payment_method = services[0]["Name"]
+                
+                # if payment method is mypay, deduct from MyPay
+                if payment_method == "MyPay":
+                    # Check if sender has enough funds
+                    balance_query = """
+                        SELECT "MyPayBalance" 
+                        FROM "user"
+                        WHERE "UserId" = %s
+                        """
+                    balance = execute_sql_query(balance_query, [user_id])
+                    if balance < amount_due:
+                        raise ValueError("Insufficient MyPay balance.")
+
+                    # withdraw amount from user for service
+                    query = """
+                        UPDATE "user"
+                        SET "MyPayBalance" = "MyPayBalance" - %s
+                        WHERE "UserId" = %s
+                    """
+                    #execute_sql_query(query, [amount_due, user_id])
+
+                    # Add transaction to tr_mypay
+                    query = """
+                        INSERT INTO tr_mypay (UserId, Date, Nominal, CategoryId)
+                        VALUES (%s, CURRENT_DATE, %s, %s)
+                    """
+                    params = [user_id, -amount_due, "MPC01"]
+                    #execute_sql_query(query, params)
+
+                # set service status as paid
+                update_query = """
+                    UPDATE tr_order_status 
+                    SET "StatusId" = %s
+                    WHERE "ServiceTrId" = %s
+                    """
+                params = ['STI02', service_id] # TODO update status id as paid
+                result = execute_sql_query(update_query, params)
+
+
+            elif state == 'Transfer':
+                print("MyPay Transfer")
+                recipient_phone = request.POST.get('recipient_phone')
+                amount = float(request.POST.get('transfer_amount'))
+                if amount <= 0:
+                    raise ValueError("Transfer amount must be positive.")
+                
+                # Try to get user id of recipient phone
+                # Check if phone number to transfer to exists
+                phone_query = """
+                    SELECT * 
+                    FROM "user"
+                    WHERE "PhoneNum" = %s
+                    """
+                recipient = execute_sql_query(phone_query, [recipient_phone])
+                if len(recipient) == 0:
+                    raise ValueError("Cannot transfer to that account.")
+                recipient_id = recipient[0]["UserId"]
+                print(recipient_id)
+                if recipient_id == user_id:
+                    raise ValueError("Cannot transfer to self.")
+
+                # Check if sender has enough funds
+                balance_query = """
+                    SELECT "MyPayBalance" 
+                    FROM "user"
+                    WHERE "UserId" = %s
+                    """
+                balance = execute_sql_query(balance_query, [user_id])
+                if balance < amount:
+                    raise ValueError("Insufficient balance.")
+
+                # Deduct from sender
+                deduct_query = """
+                    UPDATE "user"
+                    SET "MyPayBalance" = "MyPayBalance" - %s
+                    WHERE "UserId" = %s
+                """
+                #execute_sql_query(deduct_query, [amount, user_id])
+
+                # Add transaction to tr_mypay of sender
+                query = """
+                    INSERT INTO tr_mypay (UserId, Date, Nominal, CategoryId)
+                    VALUES (%s, CURRENT_DATE, %s, %s)
+                """
+                params = [user_id, -amount, "MPC02"]
+                #execute_sql_query(query, params)
+
+                # Add to recipient
+                add_query = """
+                    UPDATE "user"
+                    SET "MyPayBalance" = "MyPayBalance" + %s
+                    WHERE "PhoneNum" = %s
+                """
+                #execute_sql_query(add_query, [amount, recipient_phone])
+
+                # Add transaction to tr_mypay of recipient
+                query = """
+                    INSERT INTO tr_mypay (UserId, Date, Nominal, CategoryId)
+                    VALUES (%s, CURRENT_DATE, %s, %s)
+                """
+                params = [recipient_id, amount, "MPC00"]
+                #execute_sql_query(query, params)
+
+            elif state == 'Withdrawal':
+                print("MyPay Withdrawal")
+                bank_name = request.POST.get('bank_name')
+                account_number = request.POST.get('bank_account')
+                withdrawal_amount = float(request.POST.get('withdrawal_amount'))
+                if withdrawal_amount <= 0:
+                    raise ValueError("Withdrawal amount must be positive.")
+                
+                # Check if sender has enough funds
+                balance_query = """
+                    SELECT "MyPayBalance" 
+                    FROM "user"
+                    WHERE "UserId" = %s
+                    """
+                balance = execute_sql_query(balance_query, [user_id])
+                if balance < amount:
+                    raise ValueError("Insufficient balance.")
+                
+                deduct_query = """
+                    UPDATE "user"
+                    SET "MyPayBalance" = "MyPayBalance" - %s
+                    WHERE "UserId" = %s
+                """
+                #execute_sql_query(deduct_query, [amount, user_id])
+
+                # Add transaction to tr_mypay
+                query = """
+                    INSERT INTO tr_mypay (UserId, Date, Nominal, CategoryId)
+                    VALUES (%s, CURRENT_DATE, %s, %s)
+                """
+                params = [user_id, -amount, "MPC04"]
+                #execute_sql_query(query, params)
+
+            messages.success(request, "Transaction successful!")
+
+        except Exception as e:
+            messages.error(request, f"Error: {e}")
+
+    return render(request, 'mypaytransaction.html', context)
 
 
 @login_required(login_url="/landingpage")

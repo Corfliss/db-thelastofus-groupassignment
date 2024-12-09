@@ -111,6 +111,14 @@
   text-align: center;
 }
 
+.text-input-box {
+  background-color: #ddd;
+}
+
+label {
+  width: 100%;
+}
+
 .filter-form {
   display: flex;
   justify-content: space-between;
