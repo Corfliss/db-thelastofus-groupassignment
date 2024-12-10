@@ -111,6 +111,14 @@
   text-align: center;
 }
 
+.text-input-box {
+  background-color: #ddd;
+}
+
+.big-label {
+  width: 100%;
+}
+
 .filter-form {
   display: flex;
   justify-content: space-between;
@@ -209,7 +217,7 @@ h2 {
 }
 
 label {
-  margin-bottom: 5px;
+  margin: 5px;
   display: inline-block;
 }
 
