@@ -115,7 +115,7 @@
   background-color: #ddd;
 }
 
-label {
+.big-label {
   width: 100%;
 }
 
@@ -217,7 +217,7 @@ h2 {
 }
 
 label {
-  margin-bottom: 5px;
+  margin: 5px;
   display: inline-block;
 }
 

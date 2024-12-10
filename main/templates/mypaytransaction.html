@@ -66,31 +66,31 @@
         </select>
 
         <div id="Top Up" class="form-section" style="display:none;">
-            <label for="top_up_amount">Top-Up Amount:</label>
+            <label for="top_up_amount" class="big-label">Top-Up Amount:</label>
             <input type="number" name="top_up_amount" step="0.01" class="text-input-box"/>
         </div>
 
         <div id="Service Payment" class="form-section" style="display:none;">
-            <label for="service_id">Service Session Selection:</label>
+            <label for="service_id" class="big-label">Service Session Selection:</label>
             <select name="service_id" id="service_id" onchange="updateServicePrice(this)">
                 <option value="" data-price="0">--Select--</option>
                 {% for service in services %}
                     <option value="{{ service.Id }}" data-price="{{ service.TotalPrice }}">{{ service.Name }} Session {{ service.Session }}</option>
                 {% endfor %}
             </select>
-            <label for="service_price" >Service Price:</label>
+            <label for="service_price" class="big-label">Service Price:</label>
             <input type="number" name="service_price" id="service_price" step="0.01" class="text-input-box" readonly/>
         </div>
 
         <div id="Transfer" class="form-section" style="display:none;">
-            <label for="recipient_phone">Recipient's Phone Number:</label>
+            <label for="recipient_phone" class="big-label">Recipient's Phone Number:</label>
             <input type="text" name="recipient_phone" class="text-input-box"/>
-            <label for="transfer_amount">Transfer Amount:</label>
+            <label for="transfer_amount" class="big-label">Transfer Amount:</label>
             <input type="number" name="transfer_amount" step="0.01" class="text-input-box"/>
         </div>
 
         <div id="Withdrawal" class="form-section" style="display:none;">
-            <label for="bank_name">Bank Name:</label>
+            <label for="bank_name" class="big-label">Bank Name:</label>
             <select name="bank_name">
                 <option value="GoPay">GoPay</option>
                 <option value="OVO">OVO</option>
@@ -98,9 +98,9 @@
                 <option value="BNI">BNI</option>
                 <option value="Mandiri">Mandiri</option>
             </select>
-            <label for="bank_account">Bank Account Number:</label>
+            <label for="bank_account" class="big-label">Bank Account Number:</label>
             <input type="text" name="bank_account" class="text-input-box"/>
-            <label for="withdrawal_amount">Withdrawal Amount:</label>
+            <label for="withdrawal_amount" class="big-label">Withdrawal Amount:</label>
             <input type="number" name="withdrawal_amount" step="0.01" class="text-input-box"/>
         </div>
 

@@ -235,11 +235,13 @@ def worker_profile(request):
     context = {"title": "My Profile"}
     return render(request, "worker_profile.html", context)
 
-@login_required(login_url="/landingpage")
+# @login_required(login_url="/landingpage") # TODO uncomment
 def mypay(request):
-    # user_id = 'USR00' # should be based on request
+    # user_id = 'USR00' # TODO should be based on request
     # Proposed solution:
-    user_id = request.user
+    #user_id = request.user
+    user_id = 'USR00'
+    print(user_id)
      
     user_query = """
         SELECT "PhoneNum", "MyPayBalance", "Username", "UserId"
@@ -271,7 +273,7 @@ def mypay(request):
     return render(request, "mypay.html", context)
 
 
-@login_required(login_url="/landingpage")
+# @login_required(login_url="/landingpage") # TODO uncomment
 def mypay_transaction(request):
     
     user_id = 'USR00' # TODO should be based on request
@@ -415,13 +417,13 @@ def mypay_transaction(request):
                     params = [user_id, -amount_due, "MPC01"]
                     #execute_sql_query(query, params)
 
-                # set service status as paid
+                # set service status as looking for worker
                 update_query = """
                     UPDATE tr_order_status 
                     SET "StatusId" = %s
                     WHERE "ServiceTrId" = %s
                     """
-                params = ['STI02', service_id] # TODO update status id as paid
+                params = ['STI03', service_id]
                 result = execute_sql_query(update_query, params)
 
 
@@ -530,24 +532,122 @@ def mypay_transaction(request):
     return render(request, 'mypaytransaction.html', context)
 
 
-@login_required(login_url="/landingpage")
+#@login_required(login_url="/landingpage") # TODO uncomment
 def service_job(request):
-    categories = {
-            'service 1': ['1a', '1b'],
-            'service 2': ['2a', '2b', '2c'],
+    user_id = 'USR02'
+    # fetch which categories worker is registered for
+    categories_query = """
+        SELECT w."SCId" AS "CategoryId", s."Name"
+        FROM worker_service_category w
+        JOIN service_category s ON w."SCId" = s."SCId"
+        WHERE "WorkerId" = %s
+        """
+    categories = execute_sql_query(categories_query, [user_id])
+    print(categories)
+
+    # fetch which subcategories worker is registered for
+    subcategories_query = """
+        SELECT ss."SSCId", ss."Name", ss."SCId"
+        FROM service_subcategory ss
+        JOIN worker_service_category wsc ON ss."SCId" = wsc."SCId"
+        WHERE wsc."WorkerId" = %s
+        """
+    subcategories = execute_sql_query(subcategories_query, [user_id])
+    print(subcategories)
+
+    services = []
+    
+    # Filter services if search form is submitted
+    if request.method == 'POST' and 'search' in request.POST:
+        print("search activated")
+        category_id = request.POST.get('category')
+        subcategory_id = request.POST.get('subcategory')
+
+        if subcategory_id:
+            services_query = """
+                SELECT tso."Id" as "OrderId", tso."TotalPrice", tso."OrderDate", tso."Session", u."Username", ss."Name" AS "ServiceName"
+                FROM tr_service_order tso
+                JOIN tr_order_status tos ON tso."Id" = tos."ServiceTrId"
+                JOIN "user" u ON tso."CustomerId" = u."UserId"
+                JOIN service_subcategory ss ON tso."ServiceCategoryId" = ss."SSCId"
+                WHERE tso."ServiceCategoryId" = %s AND tos."StatusId" = %s
+            """
+            params = [subcategory_id, 'STI03']
+            services = execute_sql_query(services_query, params)
+
+        elif category_id:
+
+            services_query = """
+                SELECT tso."Id" as "OrderId", tso."TotalPrice", tso."OrderDate", tso."Session", u."Username", ss."Name" AS "ServiceName"
+                FROM tr_service_order tso
+                JOIN tr_order_status tos ON tso."Id" = tos."ServiceTrId"
+                JOIN "user" u ON tso."CustomerId" = u."UserId"
+                JOIN service_subcategory ss ON tso."ServiceCategoryId" = ss."SSCId"
+                WHERE ss."SCId" = %s AND tos."StatusId" = %s
+                """
+            params = [category_id, 'STI03']
+            services = execute_sql_query(services_query, params)
+
+        else:
+            # fetch all services available for worker to take
+            services_query = """
+                SELECT DISTINCT tso."Id", tso."TotalPrice", tso."OrderDate", tso."Session", u."Username", ss."Name" AS "ServiceName"
+                FROM tr_service_order tso
+                JOIN tr_order_status tos ON tso."Id" = tos."ServiceTrId"
+                JOIN "user" u ON tso."CustomerId" = u."UserId"
+                JOIN service_subcategory ss ON tso."ServiceCategoryId" = ss."SSCId"
+                JOIN worker_service_category wsc ON ss."SCId" = wsc."SCId"
+                WHERE wsc."WorkerId" = %s AND tos."StatusId" = %s
+            """
+            params = [user_id, 'STI03']
+            services = execute_sql_query(services_query, params)
+            
+
+        print(services)
+
+    # Handle Accept Order action
+    if request.method == 'POST' and 'accept_order' in request.POST:
+        order_id = request.POST['order_id']
+
+        # validate that order still exists as looking for workers
+        order_query = """
+                    SELECT o."Id", o."Session"
+                    FROM tr_service_order o
+                    JOIN tr_order_status tos ON o."Id" = tos."ServiceTrId"
+                    WHERE o."Id" = %s AND tos."StatusId" = %s
+                    """
+        params = [order_id, 'STI03']
+        order = execute_sql_query(order_query, params)
+
+        if len(order) == 0:
+            raise ValueError("Cannot accept this service.")
+        session = order[0]["Session"]
+
+        # change the status to waiting for worker
+        update_query = """
+                    UPDATE tr_order_status 
+                    SET "StatusId" = %s
+                    WHERE "ServiceTrId" = %s
+                    """
+        params = ['STI04', order_id] 
+        execute_sql_query(update_query, params)
+
+        # update the service_order with updated info
+        accept_order_query = """
+            UPDATE tr_service_order 
+            SET "ServiceDate" = CURRENT_DATE, 
+            "ServiceTime" = CURRENT_TIMESTAMP + INTERVAL '%s days',
+            "WorkerId" = %s
+            WHERE "Id" = %s;
+        """
+        params = [session, user_id, order_id]
+        execute_sql_query(accept_order_query, params)
+
+    context = {
+        'categories': categories,
+        'subcategories': subcategories,
+        'services': services,
     }
-    subcategories = []
-
-    selected_category = 'service 1';
-    if selected_category in categories:
-        subcategories = categories.get(selected_category, [])
-
-    context = {"user": request.user,
-               'categories': categories,
-               'selected_category': selected_category,
-               'subcategories': subcategories
-               }
-
     return render(request, "servicejob.html", context)
 
 
