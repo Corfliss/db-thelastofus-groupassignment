@@ -15,6 +15,7 @@ import datetime
 from django.shortcuts import render
 from django.db import connection
 from django.http import JsonResponse
+import uuid
 
 def execute_sql_query(query, params=None):
     """Helper function to execute raw SQL queries."""
@@ -26,6 +27,7 @@ def execute_sql_query(query, params=None):
             return results
         return None
 
+
 @login_required(login_url="/landingpage")
 def show_main(request):
     context = {
@@ -34,91 +36,127 @@ def show_main(request):
     }
     return render(request, "home.html", context)
 
+
 def register(request):
     context = {"title": "Registration Page"}
     return render(request, "register.html", context)
 
+
 def register_customer(request):
     if request.method == 'POST':
-        # Fetch the latest user ID from the database
-        with connection.cursor() as cursor:
-            cursor.execute("""SET search_path TO public; SELECT userid FROM "USER" ORDER BY userid DESC LIMIT 1;""")
-            latest_user = cursor.fetchone()
-            if latest_user:
-                new_user_id = f"USR{int(latest_user[0][3:]) + 1:02d}"
-            else:
-                new_user_id = "USR01"  # Default for the first user
 
-        # Get data from the POST request
+        # Get data from POST request
         username = request.POST['username']
         sex = request.POST['sex']
         phonenum = request.POST['phonenum']
         password = make_password(request.POST['password'])
-        birthdate = request.POST['birthdate']
+        dob = request.POST['dob']
         address = request.POST['address']
+        new_userid = str(uuid.uuid4())
 
         try:
             with connection.cursor() as cursor:
-                # Insert the new user into the USER table
-                cursor.execute("""
-                SET search_path TO public;
-                INSERT INTO "USER" (userid, username, pwd, sex, phonenum, dob, address) 
-                VALUES (%s, %s, %s, %s, %s, %s, %s);
-                """, [new_user_id, username, password, sex, phonenum, birthdate, address])
 
-                # Insert into the CUSTOMER table
-                cursor.execute("""
-                INSERT INTO CUSTOMER (customerid, level) VALUES (%s, %s);
-                """, [new_user_id, 0])
+                # Validate unique phone number
+                query_string1 = """
+                    SELECT COUNT(*)
+                    FROM "user"
+                    WHERE user.PhoneNum = %d
+                """
+                execute_sql_query(query_string1, [phonenum])
+
+                if cursor.fetchone()[0] > 0:
+                    messages.error(request, "Please use a different phone number, this phone number is registered already")
+                    return render(request, 'register_customer.html')
+
+
+                # Insert new user into USER table
+                # query_string2 = (
+                #     """
+                #     SELECT phonenum
+                #     FROM "user"
+                #     WHERE phonenum = %d
+                #     """
+                # )
+                
+                query_string2="""
+                INSERT INTO "USER" (userid, username, password, sex, phonenum, dob, address) 
+                VALUES (%s, %s, %s, %s, %d, %s, %s);
+                """
+                params_2 = [new_userid, username, password, sex, phonenum, dob, address]
+
+                execute_sql_query(query_string2, params_2)
+
+                query_string3=  """
+                INSERT INTO CUSTOMER (customerid, level) VALUES (%s, %d);
+                """
+                params_3 = [new_userid, 0]
+                
+                execute_sql_query(query_string3, params_3)
 
             messages.success(request, "Customer registration successful!")
             return redirect('login_user')
 
         except Exception as e:
             messages.error(request, f"Error during registration: {str(e)}")
-    
+
     return render(request, 'register_customer.html')
 
 
 def register_worker(request):
     if request.method == 'POST':
-        # Fetch the latest user ID from the database
+        
+        # Fetch latest user ID from the database
         with connection.cursor() as cursor:
             cursor.execute("""SET search_path TO public; SELECT userid FROM "USER" ORDER BY userid DESC LIMIT 1;""")
             latest_user = cursor.fetchone()
             if latest_user:
-                new_user_id = f"USR{int(latest_user[0][3:]) + 1:02d}"
+                new_userid = f"USR{int(latest_user[0][3:]) + 1:02d}"
             else:
-                new_user_id = "USR01"  # Default for the first user
+                new_userid = "USR01"  # Default for first user
 
-        # Get data from the POST request
+        # Get data from POST request
         username = request.POST['username']
         sex = request.POST['sex']
         phonenum = request.POST['phonenum']
         password = make_password(request.POST['password'])
-        birthdate = request.POST['birthdate']
+        dob = request.POST['dob']
         address = request.POST['address']
 
-        # Additional fields for workers
+        # Specific workers attributes
         bankname = request.POST['bankname']
         accnumber = request.POST['accnumber']
         npwp = request.POST['npwp']
         picurl = request.POST['picurl']
+        new_userid = str(uuid.uuid4())
 
         try:
             with connection.cursor() as cursor:
+                # Validate unique phone number
+                cursor.execute("""SET search_path TO public; SELECT COUNT(*) FROM "USER" WHERE phonenum = %s;""", [phonenum])
+                if cursor.fetchone()[0] > 0:
+                    messages.error(request, "Please use a different phone number, this phone number is registered already")
+                    return render(request, 'register_worker.html')
+
+                # Validate unique bank name and account number combination
+                cursor.execute("""SET search_path TO public; SELECT COUNT(*) FROM WORKER WHERE bankname = %s AND accnumber = %s;""",
+                               [bankname, accnumber])
+                if cursor.fetchone()[0] > 0:
+                    messages.error(request, "Please use a different bank name or account number")
+                    return render(request, 'register_worker.html')
+
                 # Insert the new user into the USER table
                 cursor.execute("""
                 SET search_path TO public;
-                INSERT INTO "USER" (userid, username, pwd, sex, phonenum, dob, address) 
+                INSERT INTO "USER" (userid, username, password, sex, phonenum, dob, address) 
                 VALUES (%s, %s, %s, %s, %s, %s, %s);
-                """, [new_user_id, username, password, sex, phonenum, birthdate, address])
+                """, [new_userid, username, password, sex, phonenum, dob, address])
 
                 # Insert into the WORKER table
                 cursor.execute("""
                 INSERT INTO WORKER (workerid, bankname, accnumber, npwp, picurl) 
                 VALUES (%s, %s, %s, %s, %s);
-                """, [new_user_id, bankname, accnumber, npwp, picurl])
+                """, [new_userid, bankname, accnumber, npwp, picurl])
 
             messages.success(request, "Worker registration successful!")
             return redirect('login_user')
@@ -131,27 +169,108 @@ def register_worker(request):
 
 def login_user(request):
     if request.method == "POST":
+        phonenum = request.POST.get('phonenumber')
+        password = request.POST.get('password')
+
+        # Ensure both fields are provided
+        if not phonenum or not password:
+            messages.error(request, "Phone number and password are required.")
+            return render(request, "login.html")
+
+        try:
+            # Validate phone number and password
+            query = """SELECT "UserId", "Password" FROM "user" WHERE "PhoneNum" = %s;"""
+            user_data = execute_sql_query(query, [phonenum])
+            print(user_data)
+            if user_data:
+                user_id, stored_password = user_data[0]['UserId'], user_data[0]['Password']
+                print(user_id, stored_password)
+                if str(password) == str(stored_password):
+                    print("pass 1")
+                    # Determine user type (customer or worker)
+                    query_user_type = """SELECT "CustomerId" FROM "customer" WHERE "CustomerId" = %s;"""
+                    user_type_result = execute_sql_query(query_user_type, [user_id])
+                    user_type = "customer" if user_type_result else "worker"
+                    # Log in user and set cookies
+                    request.session["is_authenticated"] = True
+                    print("pass 2")
+                    request.session["user_id"] = user_id
+                    request.session["user_type"] = user_type
+                    
+                    # Simulated login
+                    login(request, user_id)
+
+                    # Set cookie for last login
+                    response = HttpResponseRedirect(reverse("main:show_main"))
+                    response.set_cookie("last_login", str(datetime.datetime.now()))
+
+                    return response
+                else:
+                    messages.error(request, "Invalid phone number or password.")
+            else:
+                messages.error(request, "Invalid phone number or password.")
+                
+        except Exception as e:
+            messages.error(request, f"An error occurred during login: {str(e)}")
         
-        phonenum = request.POST['phonenum']
-        checked_password = check_password(request.POST['password'])
-        user = authenticate(request, phone_number=phonenum, password=checked_password)
-
-        if user is not None:
-            login(request, user)
-            response = HttpResponseRedirect(reverse("main:show_main"))  
-            response.set_cookie("last_login", str(datetime.datetime.now())) 
-            return response
-        else:
-            messages.error(request, "Invalid phone number or password.")
-
     return render(request, "login.html")
 
-def logout_user(request):
-    logout(request)
-    response = HttpResponseRedirect(reverse("main:landingpage"))
-    response.delete_cookie("last_login")
-    return response
+# def login_user(request):
+#     if request.method == "POST":
+#         phonenum = request.POST.get('phonenum')
+#         password = request.POST.get('password')
 
+#         # Ensure both fields are provided
+#         if not phonenum or not password:
+#             messages.error(request, "Phone number and password are required.")
+#             return render(request, "login.html")
+
+#         try:
+#             with connection.cursor() as cursor:
+#                 # Validate phone number and password
+#                 query="""   
+#                     SELECT userid, password FROM "User" WHERE phonenum = %s;
+#                     """
+#                 user_data = execute_sql_query(query)
+
+#                 if user_data and check_password(password, user_data[1]):
+#                     user_id = user_data[0]
+
+#                     # Determine the user type
+#                     cursor.execute(
+#                         """SET search_path TO public;
+#                         SELECT customerid FROM CUSTOMER WHERE customerid = %s;""",
+#                         [user_id]
+#                     )
+#                     is_customer = cursor.fetchone()
+
+#                     if is_customer:
+#                         user_type = 'customer'
+#                     else:
+#                         user_type = 'worker'
+
+#                     # Log in user and set cookies
+#                     request.session['is_authenticated'] = True
+#                     request.session['user_id'] = user_id
+#                     request.session['user_type'] = user_type
+#                     login(request, user_id)  # Simulated login
+#                     response = HttpResponseRedirect(reverse("main:show_main"))
+#                     response.set_cookie("last_login", str(datetime.datetime.now()))
+#                     return response
+#                 else:
+#                     # Invalid credentials
+#                     messages.error(request, "Invalid phone number and password.")
+
+#         except Exception as e:
+#             messages.error(request, f"An error occurred during login: {str(e)}")
+#             return render(request, "login.html")
+
+#     return render(request, "login.html")
+
+
+def logout_user(request):
+    request.session.flush()
+    return redirect("main:landingpage")
 
 def home(request):
     user = request.user
