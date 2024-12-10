@@ -228,10 +228,10 @@ def home(request):
 
     return render(request, "home.html", context)
 
-@login_required(login_url="/landingpage")
+# @login_required(login_url="/landingpage")
 def subcategory(request):
     # This might break the code, if anyone know better, glad to see the fix
-    subcategory_name = request.GET.get('subcategory')
+    subcategory_name = request.GET.get('subcategory_id')
 
     params = [subcategory_name]
     query = """
@@ -279,6 +279,9 @@ def subcategory(request):
         "service_session_list" : service_session_list
     }
     
+    # For debugging
+    print(context)
+
     return render(request, "subcategory.html", context)
 
 
