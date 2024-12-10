@@ -736,7 +736,38 @@ def service_job_status(request):
 
 
 def service_booking(request):
-    context = {"title": "Sijarta Service Booking"}
+    user_id = request.user.id  # Get logged-in user ID
+    query = """
+        SELECT 
+            ssc."Name" AS SubcategoryName,
+            ss."Session" AS SessionName,
+            ss."Price" AS SessionPrice,
+            wu."Username" AS WorkerName,
+            os."Status" AS OrderStatus
+        FROM 
+            "user" u
+        JOIN 
+            "customer" c ON c."CustomerId" = u."UserId"
+        JOIN 
+            "orders" o ON o."CustomerId" = c."CustomerId"
+        JOIN 
+            "order_status" os ON os."OrderId" = o."OrderId"
+        JOIN 
+            "service_session" ss ON ss."SessionId" = o."SessionId"
+        JOIN 
+            "service_subcategory" ssc ON ssc."SSCId" = ss."SSCId"
+        JOIN 
+            "worker" w ON w."WorkerId" = ss."WorkerId"
+        JOIN 
+            "user" wu ON wu."UserId" = w."WorkerId"
+        WHERE 
+            u."UserId" = %s;
+    """
+    service_booking_list = execute_sql_query(query, user_id)
+    context = {
+        "title": "Sijarta Service Booking",
+        "service_booking_list": service_booking_list    
+    }
     return render(request, "service_booking.html", context)
 
 
