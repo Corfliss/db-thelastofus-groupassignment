@@ -20,7 +20,7 @@
             <select class="form-select" id="category" name="category" onchange="filterSubcategories()">
                 <option value="">--Select--</option>
                 {% for category in categories %}
-                <option value="{{ category.CategoryId }}" {% if category == request.GET.category %}selected{% endif %}>
+                <option value="{{ category.CategoryId }}" {% if category.CategoryId == request.POST.category %}selected{% endif %}>
                     {{ category.Name }}
                 </option>
                 {% endfor %}
@@ -32,7 +32,7 @@
                 <option value="" data-category="">--Select--</option>
                 {% for subcategory in subcategories %}
                 <option value="{{ subcategory.SSCId }}" data-category="{{ subcategory.SCId }}"
-                    {% if subcategory.SSCId == request.GET.subcategory %}selected{% endif %}>
+                    {% if subcategory.SSCId == request.POST.subcategory %}selected{% endif %}>
                     {{ subcategory.Name }}
                 </option>
                 {% endfor %}
@@ -72,7 +72,7 @@
                         class="update-button"
                         type="submit" 
                         name="accept_order" 
-                        value="{{ service.OrderId }}">
+                        value="{{ service.Id }}">
                         Accept Order
                     </button>
                 </form>
@@ -93,6 +93,15 @@
         const subcategorySelect = document.getElementById("subcategory");
         const subcategoryOptions = subcategorySelect.querySelectorAll("option");
 
+        // If no category is selected, hide all subcategories and reset the dropdown
+        if (!selectedCategory) {
+            subcategoryOptions.forEach(option => {
+                option.style.display = "none"; // Hide all options
+            });
+            subcategorySelect.value = ""; // Reset the dropdown to "--Select--"
+            return;
+        }
+
         // Loop through subcategory options and filter by data-category
         subcategoryOptions.forEach(option => {
             const categoryId = option.getAttribute("data-category"); // empty for --SELECT--
@@ -112,5 +121,9 @@
         }
     }
 
+    // Run filterSubcategories on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        filterSubcategories();
+    });
 </script>
 {% endblock content %}
