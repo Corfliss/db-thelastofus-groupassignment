@@ -607,7 +607,7 @@ def view_testimony(request):
     return render(request, "subcategory.html", context)
 
 def service_job(request):
-    user_id = "USR02" #request.user.id # TODO user switch
+    user_id = request.user.id
     # fetch which categories worker is registered for
     categories_query = """
         SELECT w."SCId" AS "CategoryId", s."Name"
@@ -651,7 +651,7 @@ def service_job(request):
         elif category_id:
 
             services_query = """
-                SELECT tso."Id" as "OrderId", tso."TotalPrice", tso."OrderDate", tso."Session", u."Username", ss."Name" AS "ServiceName"
+                SELECT tso."Id", tso."TotalPrice", tso."OrderDate", tso."Session", u."Username", ss."Name" AS "ServiceName"
                 FROM tr_service_order tso
                 JOIN tr_order_status tos ON tso."Id" = tos."ServiceTrId"
                 JOIN "user" u ON tso."CustomerId" = u."UserId"
@@ -690,6 +690,7 @@ def service_job(request):
                     """
         params = [order_id, "STI03"]
         order = execute_sql_query(order_query, params)
+        print(order_id)
 
         if len(order) == 0:
             raise ValueError("Cannot accept this service.")
