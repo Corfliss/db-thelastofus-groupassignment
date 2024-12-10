@@ -60,7 +60,7 @@ def register_customer(request):
         password = make_password(request.POST['password'])
         birthdate = request.POST['birthdate']
         address = request.POST['address']
-        '''
+        """
         # Customer.objects.create(
         #     name = name,
         #     sex = sex,
@@ -241,7 +241,7 @@ def home(request):
 @login_required(login_url="/landingpage")
 def subcategory(request):
     # This might break the code, if anyone know better, glad to see the fix
-    subcategory_name = request.GET.get("subcategory")
+    subcategory_name = request.GET.get('subcategory_id')
 
     params = [subcategory_name]
     query = """
@@ -288,7 +288,7 @@ def subcategory(request):
         "testimonial_list": testimonial_list,
         "service_session_list": service_session_list,
     }
-
+    
     return render(request, "subcategory.html", context)
 
 
