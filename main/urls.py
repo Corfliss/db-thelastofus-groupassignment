@@ -23,7 +23,7 @@ from main.views import (
     update_customer_profile,
     update_worker_profile,
     worker_profile_summary,
-
+    update_order_status
 )
 
 app_name = "main"
@@ -44,6 +44,7 @@ urlpatterns = [
     path("mypay-transaction/", mypay_transaction, name="mypay-transaction"),
     path("service-job/", service_job, name="service-job"),
     path("service-job-status/", service_job_status, name="service-job-status"),
+    path('service-job-status/update-status/<str:order_id>/', update_order_status, name='update_order_status'),
     path("service_booking/", service_booking, name="service_booking"),
     path("create_testimonial/", create_testimonial, name="create_testimonial"),
     path("discount/", discount, name="discount"),

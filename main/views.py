@@ -589,7 +589,7 @@ def mypay_transaction(request):
 
 # @login_required(login_url="/landingpage") # TODO uncomment
 def service_job(request):
-    user_id = 'USR02'
+    user_id = 'USR02' # TODO user switch
     # fetch which categories worker is registered for
     categories_query = """
         SELECT w."SCId" AS "CategoryId", s."Name"
@@ -705,34 +705,116 @@ def service_job(request):
     }
     return render(request, "servicejob.html", context)
 
-
 def service_job_status(request):
-    statuses = [
-        'Waiting For Worker to Depart',
-        'Arrived At Location',
-        'Providing Service',
-        'Service Completed',
-        'Order Cancelled'
-    ]
+    # Update the order status where needed
+    '''
+    update_status_query = """
+                    UPDATE order_status 
+                    SET "Status" = %s
+                    WHERE "StatusId" = %s
+                    """
+    params = ['Waiting for Worker to Depart', 'STI04']
+    execute_sql_query(update_status_query, params)
+    update_status_query = """
+                    UPDATE order_status 
+                    SET "Status" = %s
+                    WHERE "StatusId" = %s
+                    """
+    params = ['Service in Progress', 'STI05']
+    execute_sql_query(update_status_query, params)
 
-    services = [
-        {'subcategory_name': 'hello',
-         'user_name': 'username',
-         'order_date': '2021-12-23',
-         'working_date': '2021-12-26',
-         'session': 'idk',
-         'total_amount': 'money',
-         'status': 'Arrived At Location'
-    }
-    ]
+    update_status_query = """
+                    INSERT INTO order_status VALUES
+                    (%s, %s)
+                    """
+    params = ['STI06', 'Worker Arrived at Location']
+    execute_sql_query(update_status_query, params)
+
+    # show all statuses
+    select_status_query = """
+                    SELECT * FROM order_status
+                    """
+    result = execute_sql_query(select_status_query, [])
+    print(result)
+    '''
+
+    '''
+    update_status_query = """
+                    UPDATE tr_order_status 
+                    SET "StatusId" = %s
+                    WHERE "ServiceTrId" = %s
+                    """
+    params = ['STI04', 'STI00']
+    execute_sql_query(update_status_query, params)
+    '''
+
+    user_id = 'USR02' # TODO user switch
+    filter_status = request.GET.get('status', '')
+    filter_order_name = request.GET.get('order_name', '')
+
+    # Fetch all orders for the current worker with optional filters
+    orders_query = """
+        SELECT tso."Id", tso."OrderDate", tso."Session", tso."TotalPrice", tso."CustomerId", 
+            os."Status", os."StatusId", 
+            ss."Name" AS "ServiceName",
+            u."Username"
+        FROM TR_SERVICE_ORDER tso
+        JOIN TR_ORDER_STATUS tos ON tso."Id" = tos."ServiceTrId"
+        JOIN ORDER_STATUS os ON tos."StatusId" = os."StatusId"
+        JOIN service_subcategory ss ON tso."ServiceCategoryId" = ss."SSCId"
+        JOIN "user" u ON tso."CustomerId" = u."UserId"
+        WHERE tso."WorkerId" = %s
+        AND (%s = '' OR os."Status" = %s)
+        AND (%s = '' OR ss."Name" ILIKE %s)
+        ORDER BY tso."OrderDate" DESC
+    """
+    params = [user_id, filter_status, filter_status, filter_order_name, f"%{filter_order_name}%"]
+    orders = execute_sql_query(orders_query, params)
 
     context = {
-        "user": request.user,
-        'statuses': statuses,
-        'services': services
+        'orders': orders,
+        'statuses': ['Waiting for Worker to Depart', 'Worker Arrived at Location', 'Service in Progress', 'Order Completed', 'Order Canceled'],
+        'filter_status': filter_status,
+        'filter_order_name': filter_order_name,
     }
 
-    return render(request, "servicejobstatus.html", context)
+    return render(request, 'servicejobstatus.html', context)
+
+def update_order_status(request, order_id):
+    next_status_mapping = {
+        'STI04': 'STI06',
+        'STI06': 'STI05',
+        'STI05': 'STI00'
+    }
+
+    # Fetch current status
+    current_status_query = """
+        SELECT os."Status", os."StatusId"
+        FROM TR_ORDER_STATUS tos
+        JOIN ORDER_STATUS os ON tos."StatusId" = os."StatusId"
+        WHERE tos."ServiceTrId" = %s
+        ORDER BY tos."date" DESC
+    """
+    current_status = execute_sql_query(current_status_query, [order_id])
+    current_status = current_status[0]['StatusId']
+
+    # Determine the next status
+    next_status = next_status_mapping.get(current_status)
+    if not next_status:
+        print("No next status")
+        return redirect('main:service-job-status')  # No valid next status
+
+    # Update the order status
+    update_status_query = """
+                    UPDATE tr_order_status 
+                    SET "StatusId" = %s
+                    WHERE "ServiceTrId" = %s
+                    """
+    params = [next_status, order_id]
+    execute_sql_query(update_status_query, params)
+    print("Updated the order status")
+    return redirect('main:service-job-status')
+
 
 
 def service_booking(request):
