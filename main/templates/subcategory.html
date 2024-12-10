@@ -70,18 +70,27 @@
     </div>
     <div class="p-2 border-4 border-black mb-4">
         <p class="mb-2">Testimonial</p>
-        <div class="p-2 border-4 border-black mb-4">
-            <p class="text-right font-bold">2024.11.11</p>
-            <p class="text-left font-bold">Supercool Guy</p>
-            <div class="flex justify-between">
-                <p class="pr-24">Lorem ipsum dolor sit amet consectetur adipisicing elit. Expedita fugiat numquam ipsa minus! Accusamus, inventore! Minus unde ipsa vero laudantium esse quam maxime accusantium quod! Aperiam id at maiores aliquid!</p>
-                <div>
-                    <p class="font-bold text-center">Hellacool Guy</p>
-                    <p class="text-center"> 6.0/5.0</p>
+        {% if testimonies %}
+            {% for testimony in testimonies %}
+            <div class="p-2 border-4 border-black mb-4">
+                <!-- Conteneur pour aligner le pseudo et la date -->
+                <div class="flex justify-between">
+                    <p class="text-left font-bold">{{ user }}</p>
+                    <p class="text-left font-bold">{{ testimony.date }}</p>
+                </div>
+                <div class="flex justify-between">
+                    <p class="pr-24">{{ testimony.Text }}</p>
+                    <div>
+                        <p class="text-center">{{ testimony.Rating }}/5.0</p>
+                    </div>
                 </div>
             </div>
-        </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-center text-gray-500">No testimonials available for that subcategory.</p>
+        {% endif %}
     </div>
+      
 </div>
 <div
 data-dialog-backdrop="dialog"
