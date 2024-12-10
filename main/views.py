@@ -18,6 +18,7 @@ from django.shortcuts import render
 from django.db import connection
 from django.http import JsonResponse
 
+
 def execute_sql_query(query, params=None):
     """Helper function to execute raw SQL queries."""
     with connection.cursor() as cursor:
@@ -28,6 +29,7 @@ def execute_sql_query(query, params=None):
             return results
         return None
 
+
 @login_required(login_url="/landingpage")
 def show_main(request):
     context = {
@@ -36,45 +38,47 @@ def show_main(request):
     }
     return render(request, "home.html", context)
 
+
 def register(request):
     context = {"title": "Registration Page"}
     return render(request, "register.html", context)
 
+
 def register_customer(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         # temporary while there is no register user data
-        name = 'Dave'
-        sex = 'M'
-        phone_number = '1234567890'
-        password = make_password('Dave1234')
-        birthdate = '2000-09-10'
-        address = 'Street 1, LA'
-        '''
+        name = "Dave"
+        sex = "M"
+        phone_number = "1234567890"
+        password = make_password("Dave1234")
+        birthdate = "2000-09-10"
+        address = "Street 1, LA"
+        """
         name = request.POST['name']
         sex = request.POST['sex']
         phone_number = request.POST['phone_number']
         password = make_password(request.POST['password'])
         birthdate = request.POST['birthdate']
         address = request.POST['address']
-        '''
+        """
         Customer.objects.create(
-            name = name,
-            sex = sex,
-            phone_number = phone_number,
-            password = password,
-            birthdate = birthdate,
-            address = address
+            name=name,
+            sex=sex,
+            phone_number=phone_number,
+            password=password,
+            birthdate=birthdate,
+            address=address,
         )
 
         # For debugging
         messages.success(request, "Customer registration successful!")
-        return redirect('login_user')
+        return redirect("login_user")
 
     # TODO: Check if the render is fine for customer
-    return render(request, 'register_customer.html')
+    return render(request, "register_customer.html")
 
     # Previous code
-    # 
+    #
     # if request.method == "POST":
     #     form = CustomerRegistrationForm(request.POST)
     #     if form.is_valid():
@@ -86,48 +90,48 @@ def register_customer(request):
     #         return redirect("main:login")
     # else:
     #     form = CustomerRegistrationForm()
-    
+
     # context = {"form": form}
     # return render(request, "register_customer.html", context)
 
 
 def register_worker(request):
-    if request.method == 'POST':
-        name = request.POST['name']
-        sex = request.POST['sex']
-        phone_number = request.POST['phone_number']
-        password = make_password(request.POST['password'])
-        birthdate = request.POST['birthdate']
-        address = request.POST['address']
+    if request.method == "POST":
+        name = request.POST["name"]
+        sex = request.POST["sex"]
+        phone_number = request.POST["phone_number"]
+        password = make_password(request.POST["password"])
+        birthdate = request.POST["birthdate"]
+        address = request.POST["address"]
 
         # Additional parameters to be filled for worker
-        bank_name = request.POST['bank_name']
-        account_number = request.POST['account_number']
-        npwp = request.POST['npwp']
-        avatar_url = request.POST['avatar_url']
+        bank_name = request.POST["bank_name"]
+        account_number = request.POST["account_number"]
+        npwp = request.POST["npwp"]
+        avatar_url = request.POST["avatar_url"]
 
         Worker.objects.create(
-            name = name,
-            sex = sex,
-            phone_number = phone_number,
-            password = password,
-            birthdate = birthdate,
-            address = address,
-            bank_name = bank_name,
-            account_number = account_number,
-            npwp = npwp,
-            avatar_url = avatar_url
+            name=name,
+            sex=sex,
+            phone_number=phone_number,
+            password=password,
+            birthdate=birthdate,
+            address=address,
+            bank_name=bank_name,
+            account_number=account_number,
+            npwp=npwp,
+            avatar_url=avatar_url,
         )
 
         # For debugging
         messages.success(request, "Worker registration successful!")
-        return redirect('login_user')
+        return redirect("login_user")
 
     # TODO: Check if the render is fine for customer
-    return render(request, 'register_worker.html')
+    return render(request, "register_worker.html")
 
     # Previous code
-    # 
+    #
     # if request.method == "POST":
     #     form = WorkerRegistrationForm(request.POST)
     #     if form.is_valid():
@@ -143,17 +147,20 @@ def register_worker(request):
     # context = {"form": form}
     # return render(request, "register_worker.html", context)
 
+
 def login_user(request):
     if request.method == "POST":
-        
-        phone_number = request.POST['phone_number']
-        checked_password = check_password(request.POST['password'])
-        user = authenticate(request, phone_number=phone_number, password=checked_password)
+
+        phone_number = request.POST["phone_number"]
+        checked_password = check_password(request.POST["password"])
+        user = authenticate(
+            request, phone_number=phone_number, password=checked_password
+        )
 
         if user is not None:
             login(request, user)
-            response = HttpResponseRedirect(reverse("main:show_main"))  
-            response.set_cookie("last_login", str(datetime.datetime.now())) 
+            response = HttpResponseRedirect(reverse("main:show_main"))
+            response.set_cookie("last_login", str(datetime.datetime.now()))
             return response
         else:
             messages.error(request, "Invalid phone number or password.")
@@ -162,11 +169,11 @@ def login_user(request):
 
     # Old Code
     # else:
-        # For now, pass
-        # pass
-        # What should I change for this?
-        # Update: actually, let it go
-        # form = AuthenticationForm()
+    # For now, pass
+    # pass
+    # What should I change for this?
+    # Update: actually, let it go
+    # form = AuthenticationForm()
 
     # context = {"form": form}
     # return render(request, "login.html", context)
@@ -181,7 +188,7 @@ def logout_user(request):
 
 def home(request):
     user = request.user
-     
+
     category_subcategory = """
         SELECT 
             sc.SCId AS CategoryId,
@@ -212,10 +219,11 @@ def home(request):
 
     return render(request, "home.html", context)
 
+
 @login_required(login_url="/landingpage")
 def subcategory(request):
     # This might break the code, if anyone know better, glad to see the fix
-    subcategory_name = request.GET.get('subcategory')
+    subcategory_name = request.GET.get("subcategory")
 
     params = [subcategory_name]
     query = """
@@ -252,17 +260,17 @@ def subcategory(request):
         FROM service_session ss
         JOIN service_subcategory ssc ON ssc.SSCId = ss.SSCId
         """
-    
+
     service_session_list = execute_sql_query(service_session_query, params)
-    
+
     context = {
-        "title" : "Sijarta Subcategory",
-        "name_and_description" : name_and_description,
-        "worker_list" : worker_list,
-        "testimonial_list" : testimonial_list,
-        "service_session_list" : service_session_list
+        "title": "Sijarta Subcategory",
+        "name_and_description": name_and_description,
+        "worker_list": worker_list,
+        "testimonial_list": testimonial_list,
+        "service_session_list": service_session_list,
     }
-    
+
     return render(request, "subcategory.html", context)
 
 
@@ -271,10 +279,11 @@ def customer_profile(request):
     context = {"title": "My Profile"}
     return render(request, "customer_profile.html", context)
 
+
 @login_required(login_url="/landingpage")
 def worker_profile(request):
 
-    worker = request.GET.get('worker')
+    worker = request.GET.get("worker")
     worker_profile_query = """
         SELECT u."Username", w."Rate", w."TotalFinishOrder", u."PhoneNum", u"DoB", u."Address"
         FROM "user" u
@@ -284,20 +293,18 @@ def worker_profile(request):
     params = [worker]
     worker_profile_data = execute_sql_query(worker_profile_query, params)
 
-    context = {
-        "title": "My Profile",
-        "worker_profile_data": worker_profile_data
-    }
+    context = {"title": "My Profile", "worker_profile_data": worker_profile_data}
 
     return render(request, "worker_profile.html", context)
 
+
 # @login_required(login_url="/landingpage") # TODO comment
 def mypay(request):
-    user_id = 'USR00' # should be based on request
+    user_id = "USR00"  # should be based on request
     # Proposed solution:
     # user_id = request.user
     print(user_id)
-    
+
     user_query = """
         SELECT "PhoneNum", "MyPayBalance", "Username", "UserId"
         FROM "user"
@@ -330,10 +337,10 @@ def mypay(request):
 
 # @login_required(login_url="/landingpage") # TODO uncomment
 def mypay_transaction(request):
-    
-    user_id = 'USR00' # TODO should be based on request
+
+    user_id = "USR00"  # TODO should be based on request
     account = None
-     
+
     # try to query userid in customer
     customer_query = """
         SELECT *
@@ -342,8 +349,8 @@ def mypay_transaction(request):
     """
     customer_result = execute_sql_query(customer_query, [user_id])
     if len(customer_result) > 0:
-        account = 'customer'
-    
+        account = "customer"
+
     # else try to query userid in worker
     else:
         worker_query = """
@@ -353,19 +360,19 @@ def mypay_transaction(request):
         """
         worker_result = execute_sql_query(worker_query, [user_id])
         if len(customer_result) > 0:
-            account = 'worker'
+            account = "worker"
 
     # if doesn't exist, then user neither customer nor worker
-    
+
     # organize the service categories
     categories = []
     services = []
-    if account == 'customer':
+    if account == "customer":
         categories = [
-            ('Top Up'),
-            ('Service Payment'),
-            ('Transfer'),
-            ('Withdrawal'),
+            ("Top Up"),
+            ("Service Payment"),
+            ("Transfer"),
+            ("Withdrawal"),
         ]
 
         # query service orders that have not yet been paid
@@ -383,39 +390,59 @@ def mypay_transaction(request):
         services = execute_sql_query(service_query, [user_id, "Waiting for Payment"])
         print(services)
 
-    elif account == 'worker':
+    elif account == "worker":
         categories = [
-            ('Top Up'),
-            ('Transfer'),
-            ('Withdrawal'),
+            ("Top Up"),
+            ("Transfer"),
+            ("Withdrawal"),
         ]
-    
-    context = {
-        'states': categories,
-        'services': services
-    }
+    else:
+        categories = []
 
-    if request.method == 'POST':
+    # get the selected transaction category from the dropdown
+    selected_category = request.GET.get("category", None)  # Default to None
+    # ensure selected category is one of the category options
+    is_valid_category = any(selected_category == category[0] for category in categories)
+    if not is_valid_category:
+        selected_category = None
+
+    form = None
+
+    if selected_category == "top_up":
+        form = TopUpForm()
+    elif selected_category == "service_payment":
+        # Fetch services
+        services = [("1", "Service 1 - 500"), ("2", "Service 2 - 3000")]
+        form = ServicePaymentForm()
+        form.fields["service_session"].choices = services
+    elif selected_category == "transfer":
+        form = TransferForm()
+    elif selected_category == "withdrawal":
+        form = WithdrawalForm()
+
+    context = {"states": categories, "services": services}
+
+    if request.method == "POST":
         print("POST request triggered")
 
-        state = request.POST.get('state')
-        user_id = 'USR00' # should be based on request
+        state = request.POST.get("state")
+        user_id = "USR00"  # should be based on request
 
         try:
             # Handle each state
-            if state == 'Top Up':
+            if state == "Top Up":
                 print("MyPay Top Up")
-                amount = float(request.POST.get('top_up_amount'))
+                amount = float(request.POST.get("top_up_amount"))
                 if amount <= 0:
                     raise ValueError("Top-up amount must be positive.")
-                
+
                 # increase user's MyPay balance
                 query = """
                     UPDATE "user"
                     SET "MyPayBalance" = "MyPayBalance" + %s
                     WHERE "UserId" = %s
                 """
-                #execute_sql_query(query, [amount, user_id])
+                # execute_sql_query(query, [amount, user_id])
 
                 # Add transaction to tr_mypay
                 query = """
@@ -423,11 +450,11 @@ def mypay_transaction(request):
                     VALUES (%s, CURRENT_DATE, %s, %s)
                 """
                 params = [user_id, amount, "MPC00"]
-                #execute_sql_query(query, params)
+                # execute_sql_query(query, params)
 
-            elif state == 'Service Payment':
-                service_id = request.POST.get('service_id')
-                amount_due = float(request.POST.get('service_price'))
+            elif state == "Service Payment":
+                service_id = request.POST.get("service_id")
+                amount_due = float(request.POST.get("service_price"))
                 print("MyPay Service Payment id: ", service_id)
 
                 service_query = """
@@ -440,10 +467,10 @@ def mypay_transaction(request):
 
                 if len(services) == 0:
                     raise ValueError("Cannot pay for this service.")
-                
+
                 amount_due = services[0]["TotalPrice"]
                 payment_method = services[0]["Name"]
-                
+
                 # if payment method is mypay, deduct from MyPay
                 if payment_method == "MyPay":
                     # Check if sender has enough funds
@@ -462,7 +489,7 @@ def mypay_transaction(request):
                         SET "MyPayBalance" = "MyPayBalance" - %s
                         WHERE "UserId" = %s
                     """
-                    #execute_sql_query(query, [amount_due, user_id])
+                    # execute_sql_query(query, [amount_due, user_id])
 
                     # Add transaction to tr_mypay
                     query = """
@@ -470,7 +497,7 @@ def mypay_transaction(request):
                         VALUES (%s, CURRENT_DATE, %s, %s)
                     """
                     params = [user_id, -amount_due, "MPC01"]
-                    #execute_sql_query(query, params)
+                    # execute_sql_query(query, params)
 
                 # set service status as looking for worker
                 update_query = """
@@ -478,17 +505,16 @@ def mypay_transaction(request):
                     SET "StatusId" = %s
                     WHERE "ServiceTrId" = %s
                     """
-                params = ['STI03', service_id]
+                params = ["STI03", service_id]
                 result = execute_sql_query(update_query, params)
 
-
-            elif state == 'Transfer':
+            elif state == "Transfer":
                 print("MyPay Transfer")
-                recipient_phone = request.POST.get('recipient_phone')
-                amount = float(request.POST.get('transfer_amount'))
+                recipient_phone = request.POST.get("recipient_phone")
+                amount = float(request.POST.get("transfer_amount"))
                 if amount <= 0:
                     raise ValueError("Transfer amount must be positive.")
-                
+
                 # Try to get user id of recipient phone
                 # Check if phone number to transfer to exists
                 phone_query = """
@@ -520,7 +546,7 @@ def mypay_transaction(request):
                     SET "MyPayBalance" = "MyPayBalance" - %s
                     WHERE "UserId" = %s
                 """
-                #execute_sql_query(deduct_query, [amount, user_id])
+                # execute_sql_query(deduct_query, [amount, user_id])
 
                 # Add transaction to tr_mypay of sender
                 query = """
@@ -528,7 +554,7 @@ def mypay_transaction(request):
                     VALUES (%s, CURRENT_DATE, %s, %s)
                 """
                 params = [user_id, -amount, "MPC02"]
-                #execute_sql_query(query, params)
+                # execute_sql_query(query, params)
 
                 # Add to recipient
                 add_query = """
@@ -536,7 +562,7 @@ def mypay_transaction(request):
                     SET "MyPayBalance" = "MyPayBalance" + %s
                     WHERE "PhoneNum" = %s
                 """
-                #execute_sql_query(add_query, [amount, recipient_phone])
+                # execute_sql_query(add_query, [amount, recipient_phone])
 
                 # Add transaction to tr_mypay of recipient
                 query = """
@@ -544,16 +570,16 @@ def mypay_transaction(request):
                     VALUES (%s, CURRENT_DATE, %s, %s)
                 """
                 params = [recipient_id, amount, "MPC00"]
-                #execute_sql_query(query, params)
+                # execute_sql_query(query, params)
 
-            elif state == 'Withdrawal':
+            elif state == "Withdrawal":
                 print("MyPay Withdrawal")
-                bank_name = request.POST.get('bank_name')
-                account_number = request.POST.get('bank_account')
-                withdrawal_amount = float(request.POST.get('withdrawal_amount'))
+                bank_name = request.POST.get("bank_name")
+                account_number = request.POST.get("bank_account")
+                withdrawal_amount = float(request.POST.get("withdrawal_amount"))
                 if withdrawal_amount <= 0:
                     raise ValueError("Withdrawal amount must be positive.")
-                
+
                 # Check if sender has enough funds
                 balance_query = """
                     SELECT "MyPayBalance" 
@@ -563,13 +589,13 @@ def mypay_transaction(request):
                 balance = execute_sql_query(balance_query, [user_id])
                 if balance < amount:
                     raise ValueError("Insufficient balance.")
-                
+
                 deduct_query = """
                     UPDATE "user"
                     SET "MyPayBalance" = "MyPayBalance" - %s
                     WHERE "UserId" = %s
                 """
-                #execute_sql_query(deduct_query, [amount, user_id])
+                # execute_sql_query(deduct_query, [amount, user_id])
 
                 # Add transaction to tr_mypay
                 query = """
@@ -577,17 +603,27 @@ def mypay_transaction(request):
                     VALUES (%s, CURRENT_DATE, %s, %s)
                 """
                 params = [user_id, -amount, "MPC04"]
-                #execute_sql_query(query, params)
+                # execute_sql_query(query, params)
 
             messages.success(request, "Transaction successful!")
 
         except Exception as e:
             messages.error(request, f"Error: {e}")
 
-    return render(request, 'mypaytransaction.html', context)
+    return render(request, "mypaytransaction.html", context)
 
 
-# @login_required(login_url="/landingpage") # TODO uncomment
+# Testimony R
+@login_required(login_url="/landingpage")
+def view_testimony(request):
+    user_id = request.user
+    user_query = "SELECT * FROM testimony"
+    query_result = execute_sql_query(user_query)
+    context = {"user": user_id, "testimonies": query_result}
+    return render(request, "subcategory.html", context)
+
+
+@login_required(login_url="/landingpage")  # TODO uncomment
 def service_job(request):
     user_id = 'USR02' # TODO user switch
     # fetch which categories worker is registered for
@@ -611,12 +647,12 @@ def service_job(request):
     print(subcategories)
 
     services = []
-    
+
     # Filter services if search form is submitted
-    if request.method == 'POST' and 'search' in request.POST:
+    if request.method == "POST" and "search" in request.POST:
         print("search activated")
-        category_id = request.POST.get('category')
-        subcategory_id = request.POST.get('subcategory')
+        category_id = request.POST.get("category")
+        subcategory_id = request.POST.get("subcategory")
 
         if subcategory_id:
             services_query = """
@@ -627,7 +663,7 @@ def service_job(request):
                 JOIN service_subcategory ss ON tso."ServiceCategoryId" = ss."SSCId"
                 WHERE tso."ServiceCategoryId" = %s AND tos."StatusId" = %s
             """
-            params = [subcategory_id, 'STI03']
+            params = [subcategory_id, "STI03"]
             services = execute_sql_query(services_query, params)
 
         elif category_id:
@@ -640,7 +676,7 @@ def service_job(request):
                 JOIN service_subcategory ss ON tso."ServiceCategoryId" = ss."SSCId"
                 WHERE ss."SCId" = %s AND tos."StatusId" = %s
                 """
-            params = [category_id, 'STI03']
+            params = [category_id, "STI03"]
             services = execute_sql_query(services_query, params)
 
         else:
@@ -654,15 +690,14 @@ def service_job(request):
                 JOIN worker_service_category wsc ON ss."SCId" = wsc."SCId"
                 WHERE wsc."WorkerId" = %s AND tos."StatusId" = %s
             """
-            params = [user_id, 'STI03']
+            params = [user_id, "STI03"]
             services = execute_sql_query(services_query, params)
-            
 
         print(services)
 
     # Handle Accept Order action
-    if request.method == 'POST' and 'accept_order' in request.POST:
-        order_id = request.POST['order_id']
+    if request.method == "POST" and "accept_order" in request.POST:
+        order_id = request.POST["order_id"]
 
         # validate that order still exists as looking for workers
         order_query = """
@@ -671,7 +706,7 @@ def service_job(request):
                     JOIN tr_order_status tos ON o."Id" = tos."ServiceTrId"
                     WHERE o."Id" = %s AND tos."StatusId" = %s
                     """
-        params = [order_id, 'STI03']
+        params = [order_id, "STI03"]
         order = execute_sql_query(order_query, params)
 
         if len(order) == 0:
@@ -684,7 +719,7 @@ def service_job(request):
                     SET "StatusId" = %s
                     WHERE "ServiceTrId" = %s
                     """
-        params = ['STI04', order_id] 
+        params = ["STI04", order_id]
         execute_sql_query(update_query, params)
 
         # update the service_order with updated info
@@ -699,9 +734,9 @@ def service_job(request):
         execute_sql_query(accept_order_query, params)
 
     context = {
-        'categories': categories,
-        'subcategories': subcategories,
-        'services': services,
+        "categories": categories,
+        "subcategories": subcategories,
+        "services": services,
     }
     return render(request, "servicejob.html", context)
 
@@ -848,7 +883,7 @@ def service_booking(request):
     service_booking_list = execute_sql_query(query, user_id)
     context = {
         "title": "Sijarta Service Booking",
-        "service_booking_list": service_booking_list    
+        "service_booking_list": service_booking_list,
     }
     return render(request, "service_booking.html", context)
 
@@ -858,35 +893,59 @@ def create_testimonial(request):
 
 
 def discount(request):
-    return render(request, "discount.html")
+    voucher_query = """
+    SELECT v."Code","MinTrOrder", "NmbDayValid", "UserQuota", "Price", "Discount" 
+    FROM voucher v 
+    JOIN discount d
+    ON v."Code" = d."Code"
+"""
+    promo_query = """
+    SELECT "Code", "OfferEndDate" FROM promo
+"""
+    voucher_results = execute_sql_query(voucher_query)
+    promo_results = execute_sql_query(promo_query)
+    context = {
+        "user": request.user,
+        "vouchers": voucher_results,
+        "promo": promo_results,
+    }
+    return render(request, "discount.html", context)
+
 
 def myorder(request):
     return render(request, "myorder.html")
 
+
 @csrf_exempt
 def update_service_status(request, service_id):
-    if request.method == 'POST':
+    if request.method == "POST":
         data = json.loads(request.body)
-        new_status = data.get('status')
+        new_status = data.get("status")
 
         try:
             # Update the service object in the database
             service = Service.objects.get(id=service_id)
             service.status = new_status
             service.save()
-            return JsonResponse({'success': True})
+            return JsonResponse({"success": True})
         except Service.DoesNotExist:
-            return JsonResponse({'success': False, 'error': 'Service not found'}, status=404)
-    return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
+            return JsonResponse(
+                {"success": False, "error": "Service not found"}, status=404
+            )
+    return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
+
 
 def landingpage(request):
     return render(request, "landingpage.html")
 
+
 def update_customer_profile(request):
     return render(request, "update_customer_profile.html")
 
+
 def update_worker_profile(request):
     return render(request, "update_worker_profile.html")
+
 
 @login_required(login_url="/landingpage")
 def update_customer_profile(request):
@@ -895,14 +954,15 @@ def update_customer_profile(request):
     form = CustomerRegistrationForm(request.POST or None, instance=customer)
 
     if form.is_valid() and request.method == "POST":
-            form.save()
-            messages.success(request, "Your profile has been updated successfully.")
-            return HttpResponseRedirect(reverse('main:customer-profile'))
+        form.save()
+        messages.success(request, "Your profile has been updated successfully.")
+        return HttpResponseRedirect(reverse("main:customer-profile"))
     else:
         form = CustomerRegistrationForm(instance=customer)
 
     context = {"form": form}
     return render(request, "update_customer_profile.html", context)
+
 
 @login_required(login_url="/landingpage")
 def update_worker_profile(request):
@@ -918,6 +978,7 @@ def update_worker_profile(request):
 
     context = {"form": form}
     return render(request, "update_worker_profile.html", context)
+
 
 def worker_profile_summary(request):
     return render(request, "worker_profile_summary.html")
