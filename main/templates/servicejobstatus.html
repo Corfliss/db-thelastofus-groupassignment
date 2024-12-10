@@ -15,18 +15,20 @@
     <form method="GET" action="" class="filter-form">
         <div class="header">
             <!-- Search by Service Name -->
+            <label for="order_name">Filter by Order Name:</label>
             <input 
-                type="text" 
-                name="search" 
-                placeholder="Service Name" 
+                type="text"
+                id="order_name" 
+                name="order_name" 
                 class="form-input" 
-                value="{{ request.GET.search|default:'' }}">
+                value="{{ filter_order_name }}">
             
             <!-- Filter by Service Status -->
-            <select name="status" class="form-select">
+            <label for="status">Filter by Status:</label>
+            <select id="status" name="status" class="form-select">
                 <option value="">All Service Statuses</option>
                 {% for status in statuses %}
-                <option value="{{ status }}" {% if status == request.GET.status %}selected{% endif %}>
+                <option value="{{ status }}" {% if status == filter_status %}selected{% endif %}>
                     {{ status }}
                 </option>
                 {% endfor %}
@@ -47,34 +49,35 @@
                 <th>Service Subcategory Name</th>
                 <th>User's Name</th>
                 <th>Order Date</th>
-                <th>Working Date</th>
                 <th>Session</th>
                 <th>Total Amout</th>
                 <th>Service Status</th>
                 <th>Update Status</th>
             </tr>
-            {% for service in services %}
+            {% for order in orders %}
             <tr>
-              <td>{{ service.subcategory_name }}</td>
-              <td>{{ service.user_name }}</td>
-              <td>{{ service.order_date }}</td>
-              <td>{{ service.working_date }}</td>
-              <td>{{ service.session }}</td>
-              <td>{{ service.total_amount }}</td>
-              <td>{{ service.status }}</td>
+              <td>{{ order.ServiceName }}</td>
+              <td>{{ order.Username }}</td>
+              <td>{{ order.OrderDate }}</td>
+              <td>{{ order.Session }}</td>
+              <td>{{ order.TotalPrice }}</td>
+              <td>{{ order.Status }}</td>
               <td>
-                {% if service.status|lower != "service completed" and service.status|lower != "order cancelled" %}
-                <button 
-                  class="update-button" 
-                  onclick="updateServiceStatus('{{ service.subcategory_name }}', '{{ service.status }}')">
-                  {% if service.status|lower == "waiting for worker to depart" %}
-                  Arrived at Location
-                  {% elif service.status|lower == "arrived at location" %}
-                  Providing Service
-                  {% elif service.status|lower == "providing service" %}
-                  Service Completed
-                  {% endif %}
-                </button>
+                {% if order.Status == "Waiting for Worker to Depart" %}
+                <form action="{% url 'main:update_order_status' order.Id %}" method="POST">
+                    {% csrf_token %}
+                    <button class="update-button" type="submit">Arrived at Location</button>
+                </form>
+                {% elif order.Status == "Worker Arrived at Location" %}
+                <form action="{% url 'main:update_order_status' order.Id %}" method="POST">
+                    {% csrf_token %}
+                    <button class="update-button" type="submit">Providing Service</button>
+                </form>
+                {% elif order.Status == "Service in Progress" %}
+                <form action="{% url 'main:update_order_status' order.Id %}" method="POST">
+                    {% csrf_token %}
+                    <button class="update-button" type="submit">Service Completed</button>
+                </form>
                 {% endif %}
               </td>
             </tr>
@@ -83,55 +86,4 @@
     </div>
 </div>
 </div>
-<script>
-// List of statuses and their corresponding next button text
-const statusMap = {
-  'waiting for worker to depart': 'Arrived At Location',
-  'arrived at location': 'Providing Service',
-  'providing service': 'Service Completed',
-  'service completed': null, // No button displayed
-  'order cancelled': null,   // No button displayed
-};
-
-// Function to update the service status
-function updateServiceStatus(serviceId, currentStatus) {
-  // Find the next status based on the current status
-  const nextStatus = statusMap[currentStatus.toLowerCase()];
-
-  if (!nextStatus) return; // no action if no next status
-
-  // Make an AJAX call to update the service status on the backend
-  fetch(`/update-service-status/${serviceId}/`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRFToken': getCsrfToken(),
-    },
-    body: JSON.stringify({ status: nextStatus }),
-  })
-    .then((response) => {
-      if (response.ok) {
-        // Update the button text dynamically
-        const button = document.querySelector(
-          `button[onclick="updateServiceStatus(${serviceId}, '${currentStatus}')"]`
-        );
-        button.textContent = statusMap[nextStatus.toLowerCase()] || '';
-        
-        // hide button if the next status is the final one
-        if (!statusMap[nextStatus.toLowerCase()]) {
-          button.style.display = 'none';
-        }
-      } else {
-        console.error('Failed to update service status');
-      }
-    })
-    .catch((error) => console.error('Error:', error));
-}
-
-// Helper function to get CSRF token
-function getCsrfToken() {
-  return document.querySelector('[name=csrfmiddlewaretoken]').value;
-}
-
-</script>
 {% endblock content %}
