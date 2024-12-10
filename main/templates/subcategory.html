@@ -71,12 +71,12 @@
     <div class="p-2 border-4 border-black mb-4">
         <p class="mb-2">Testimonial</p>
         {% if testimonies %}
-            {% for testimony in testimonies %}
+            {% for testimony in testimony_list %}
             <div class="p-2 border-4 border-black mb-4">
                 <!-- Conteneur pour aligner le pseudo et la date -->
                 <div class="flex justify-between">
-                    <p class="text-left font-bold">{{ user }}</p>
-                    <p class="text-left font-bold">{{ testimony.date }}</p>
+                    <p class="text-left font-bold">{{ user.Username }}</p>
+                    <p class="text-left font-bold">{{ testimony.Date }}</p>
                 </div>
                 <div class="flex justify-between">
                     <p class="pr-24">{{ testimony.Text }}</p>
