@@ -298,7 +298,6 @@ def worker_profile(request):
     return render(request, "worker_profile.html", context)
 
 
-# @login_required(login_url="/landingpage") # TODO comment
 def mypay(request):
     user_id = "USR00"  # should be based on request
     # Proposed solution:
@@ -335,10 +334,9 @@ def mypay(request):
     return render(request, "mypay.html", context)
 
 
-# @login_required(login_url="/landingpage") # TODO uncomment
 def mypay_transaction(request):
 
-    user_id = "USR00"  # TODO should be based on request
+    user_id = request.user.id  # TODO should be based on request
     account = None
 
     # try to query userid in customer
@@ -364,6 +362,13 @@ def mypay_transaction(request):
 
     # if doesn't exist, then user neither customer nor worker
 
+    update_query = """
+                    UPDATE tr_order_status 
+                    SET "StatusId" = %s
+                    WHERE "ServiceTrId" = %s
+                    """
+    params = ["STI02", "STI00"]
+    result = execute_sql_query(update_query, params)
     # organize the service categories
     categories = []
     services = []
@@ -399,27 +404,6 @@ def mypay_transaction(request):
     else:
         categories = []
 
-    # get the selected transaction category from the dropdown
-    selected_category = request.GET.get("category", None)  # Default to None
-    # ensure selected category is one of the category options
-    is_valid_category = any(selected_category == category[0] for category in categories)
-    if not is_valid_category:
-        selected_category = None
-
-    form = None
-
-    if selected_category == "top_up":
-        form = TopUpForm()
-    elif selected_category == "service_payment":
-        # Fetch services
-        services = [("1", "Service 1 - 500"), ("2", "Service 2 - 3000")]
-        form = ServicePaymentForm()
-        form.fields["service_session"].choices = services
-    elif selected_category == "transfer":
-        form = TransferForm()
-    elif selected_category == "withdrawal":
-        form = WithdrawalForm()
-
     context = {"states": categories, "services": services}
 
     if request.method == "POST":
@@ -442,15 +426,15 @@ def mypay_transaction(request):
                     SET "MyPayBalance" = "MyPayBalance" + %s
                     WHERE "UserId" = %s
                 """
-                # execute_sql_query(query, [amount, user_id])
+                execute_sql_query(query, [amount, user_id])
 
                 # Add transaction to tr_mypay
                 query = """
-                    INSERT INTO tr_mypay (UserId, Date, Nominal, CategoryId)
+                    INSERT INTO tr_mypay ("UserId", "Date", "Nominal", "CategoryId")
                     VALUES (%s, CURRENT_DATE, %s, %s)
                 """
                 params = [user_id, amount, "MPC00"]
-                # execute_sql_query(query, params)
+                execute_sql_query(query, params)
 
             elif state == "Service Payment":
                 service_id = request.POST.get("service_id")
@@ -480,7 +464,7 @@ def mypay_transaction(request):
                         WHERE "UserId" = %s
                         """
                     balance = execute_sql_query(balance_query, [user_id])
-                    if balance < amount_due:
+                    if balance[0]["MyPayBalance"] < amount_due:
                         raise ValueError("Insufficient MyPay balance.")
 
                     # withdraw amount from user for service
@@ -489,15 +473,15 @@ def mypay_transaction(request):
                         SET "MyPayBalance" = "MyPayBalance" - %s
                         WHERE "UserId" = %s
                     """
-                    # execute_sql_query(query, [amount_due, user_id])
+                    execute_sql_query(query, [amount_due, user_id])
 
                     # Add transaction to tr_mypay
                     query = """
-                        INSERT INTO tr_mypay (UserId, Date, Nominal, CategoryId)
+                        INSERT INTO tr_mypay ("UserId", "Date", "Nominal", "CategoryId")
                         VALUES (%s, CURRENT_DATE, %s, %s)
                     """
                     params = [user_id, -amount_due, "MPC01"]
-                    # execute_sql_query(query, params)
+                    execute_sql_query(query, params)
 
                 # set service status as looking for worker
                 update_query = """
@@ -537,7 +521,7 @@ def mypay_transaction(request):
                     WHERE "UserId" = %s
                     """
                 balance = execute_sql_query(balance_query, [user_id])
-                if balance < amount:
+                if balance[0]["MyPayBalance"] < amount:
                     raise ValueError("Insufficient balance.")
 
                 # Deduct from sender
@@ -546,15 +530,15 @@ def mypay_transaction(request):
                     SET "MyPayBalance" = "MyPayBalance" - %s
                     WHERE "UserId" = %s
                 """
-                # execute_sql_query(deduct_query, [amount, user_id])
+                execute_sql_query(deduct_query, [amount, user_id])
 
                 # Add transaction to tr_mypay of sender
                 query = """
-                    INSERT INTO tr_mypay (UserId, Date, Nominal, CategoryId)
+                    INSERT INTO tr_mypay ("UserId", "Date", "Nominal", "CategoryId")
                     VALUES (%s, CURRENT_DATE, %s, %s)
                 """
                 params = [user_id, -amount, "MPC02"]
-                # execute_sql_query(query, params)
+                execute_sql_query(query, params)
 
                 # Add to recipient
                 add_query = """
@@ -562,15 +546,15 @@ def mypay_transaction(request):
                     SET "MyPayBalance" = "MyPayBalance" + %s
                     WHERE "PhoneNum" = %s
                 """
-                # execute_sql_query(add_query, [amount, recipient_phone])
+                execute_sql_query(add_query, [amount, recipient_phone])
 
                 # Add transaction to tr_mypay of recipient
                 query = """
-                    INSERT INTO tr_mypay (UserId, Date, Nominal, CategoryId)
+                    INSERT INTO tr_mypay ("UserId", "Date", "Nominal", "CategoryId")
                     VALUES (%s, CURRENT_DATE, %s, %s)
                 """
                 params = [recipient_id, amount, "MPC00"]
-                # execute_sql_query(query, params)
+                execute_sql_query(query, params)
 
             elif state == "Withdrawal":
                 print("MyPay Withdrawal")
@@ -587,7 +571,7 @@ def mypay_transaction(request):
                     WHERE "UserId" = %s
                     """
                 balance = execute_sql_query(balance_query, [user_id])
-                if balance < amount:
+                if balance[0]["MyPayBalance"] < withdrawal_amount:
                     raise ValueError("Insufficient balance.")
 
                 deduct_query = """
@@ -595,15 +579,15 @@ def mypay_transaction(request):
                     SET "MyPayBalance" = "MyPayBalance" - %s
                     WHERE "UserId" = %s
                 """
-                # execute_sql_query(deduct_query, [amount, user_id])
+                execute_sql_query(deduct_query, [withdrawal_amount, user_id])
 
                 # Add transaction to tr_mypay
                 query = """
-                    INSERT INTO tr_mypay (UserId, Date, Nominal, CategoryId)
+                    INSERT INTO tr_mypay ("UserId", "Date", "Nominal", "CategoryId")
                     VALUES (%s, CURRENT_DATE, %s, %s)
                 """
-                params = [user_id, -amount, "MPC04"]
-                # execute_sql_query(query, params)
+                params = [user_id, -withdrawal_amount, "MPC04"]
+                execute_sql_query(query, params)
 
             messages.success(request, "Transaction successful!")
 
@@ -622,10 +606,8 @@ def view_testimony(request):
     context = {"user": user_id, "testimonies": query_result}
     return render(request, "subcategory.html", context)
 
-
-@login_required(login_url="/landingpage")  # TODO uncomment
 def service_job(request):
-    user_id = 'USR02' # TODO user switch
+    user_id = "USR02" #request.user.id # TODO user switch
     # fetch which categories worker is registered for
     categories_query = """
         SELECT w."SCId" AS "CategoryId", s."Name"
@@ -697,7 +679,7 @@ def service_job(request):
 
     # Handle Accept Order action
     if request.method == "POST" and "accept_order" in request.POST:
-        order_id = request.POST["order_id"]
+        order_id = request.POST["accept_order"]
 
         # validate that order still exists as looking for workers
         order_query = """
@@ -783,7 +765,7 @@ def service_job_status(request):
     execute_sql_query(update_status_query, params)
     '''
 
-    user_id = 'USR02' # TODO user switch
+    user_id = request.user.id # TODO user switch
     filter_status = request.GET.get('status', '')
     filter_order_name = request.GET.get('order_name', '')
 
