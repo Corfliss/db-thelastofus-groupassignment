@@ -12,7 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 import json
 import datetime
-from .models import Service, Customer, Worker
+# from .models import Service, Customer, Worker
 from django.shortcuts import render
 
 from django.db import connection
@@ -60,15 +60,16 @@ def register_customer(request):
         password = make_password(request.POST['password'])
         birthdate = request.POST['birthdate']
         address = request.POST['address']
-        """
-        Customer.objects.create(
-            name=name,
-            sex=sex,
-            phone_number=phone_number,
-            password=password,
-            birthdate=birthdate,
-            address=address,
-        )
+        '''
+        # Customer.objects.create(
+        #     name = name,
+        #     sex = sex,
+        #     phone_number = phone_number,
+        #     password = password,
+        #     birthdate = birthdate,
+        #     address = address
+        # )
+
 
         # For debugging
         messages.success(request, "Customer registration successful!")
@@ -110,18 +111,19 @@ def register_worker(request):
         npwp = request.POST["npwp"]
         avatar_url = request.POST["avatar_url"]
 
-        Worker.objects.create(
-            name=name,
-            sex=sex,
-            phone_number=phone_number,
-            password=password,
-            birthdate=birthdate,
-            address=address,
-            bank_name=bank_name,
-            account_number=account_number,
-            npwp=npwp,
-            avatar_url=avatar_url,
-        )
+        # Worker.objects.create(
+        #     name = name,
+        #     sex = sex,
+        #     phone_number = phone_number,
+        #     password = password,
+        #     birthdate = birthdate,
+        #     address = address,
+        #     bank_name = bank_name,
+        #     account_number = account_number,
+        #     npwp = npwp,
+        #     avatar_url = avatar_url
+        # )
+
 
         # For debugging
         messages.success(request, "Worker registration successful!")
@@ -191,27 +193,43 @@ def home(request):
 
     category_subcategory = """
         SELECT 
-            sc.SCId AS CategoryId,
-            sc.Name AS CategoryName,
-            ssc.SSCId AS SubcategoryId,
-            ssc.Name AS SubcategoryName,
-            ssc.Description AS SubcategoryDescription
+            sc."SCId" AS CategoryId,
+            sc."Name" AS CategoryName,
+            ssc."SSCId" AS SubcategoryId,
+            ssc."Name" AS SubcategoryName,
+            ssc."Description" AS SubcategoryDescription
         FROM 
             service_category sc
         JOIN 
             service_subcategory ssc
         ON 
-            sc.SCId = ssc.SCId
+            sc."SCId" = ssc."SCId"
         ORDER BY 
-            sc.Name, ssc.Name;
+            sc."Name", ssc."Name";
     """
-    params = [user]
-    category_subcategory_result = execute_sql_query(category_subcategory, params)
+    
+    category_subcategory_result = execute_sql_query(category_subcategory, [])
+
+    # Organize data into a nested dictionary for easy rendering
+    category_subcategory_dict = {}
+
+    for row in category_subcategory_result:
+        category_id = row['categoryid']
+        if category_id not in category_subcategory_dict:
+            category_subcategory_dict[category_id] = {
+                "name": row['categoryname'],
+                "subcategories": []
+            }
+        
+        category_subcategory_dict[category_id]["subcategories"].append({
+            "name": row['subcategoryname'],
+            "description": row['subcategorydescription']
+        })
 
     context = {
         "title": "Sijarta Homepage",
         "user": user,
-        "category_subcategory_list": category_subcategory_result,
+        "categories": category_subcategory_dict
     }
 
     # For debugging purpose

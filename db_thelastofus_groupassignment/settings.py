@@ -13,8 +13,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 from decouple import config
 from django.core.exceptions import ImproperlyConfigured
+import dj_database_url
 
-# This line is not needed for now # import dj_database_url
 # This line is not needed for now # import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -93,14 +93,7 @@ WSGI_APPLICATION = "db_thelastofus_groupassignment.wsgi.application"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "postgres",
-        "USER": "postgres.fuhqmowfreadirspzmnk",
-        "PASSWORD": "basdatlastofus3",
-        "HOST": "aws-0-us-east-1.pooler.supabase.com",
-        "PORT": "6543",
-    }
+    'default': dj_database_url.config(default="postgresql://postgres.fuhqmowfreadirspzmnk:basdatlastofus3@aws-0-us-east-1.pooler.supabase.com:6543/postgres")
 }
 
 
