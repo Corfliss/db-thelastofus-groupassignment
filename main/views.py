@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout
@@ -9,11 +9,24 @@ from django.urls import reverse
 from django.core import serializers
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-
+from django.db import connection, IntegrityError, DatabaseError, InternalError
 import json
 import datetime
-# from .models import Service, Customer, Worker
+
 from django.shortcuts import render
+from django.db import connection
+from django.http import JsonResponse
+import uuid
+
+def execute_sql_query(query, params=None):
+    """Helper function to execute raw SQL queries."""
+    with connection.cursor() as cursor:
+        cursor.execute(query, params)
+        if cursor.description:  # Check if the query returns data
+            columns = [col[0] for col in cursor.description]
+            results = [dict(zip(columns, row)) for row in cursor.fetchall()]
+            return results
+        return None
 
 from django.db import connection
 from django.http import JsonResponse
@@ -33,7 +46,7 @@ def execute_sql_query(query, params=None):
 @login_required(login_url="/landingpage")
 def show_main(request):
     context = {
-        "title": "Welcome to Sijarta",
+        "title": "Welcome to Sparklean",
         "last_login": request.COOKIES["last_login"],
     }
     return render(request, "home.html", context)
@@ -45,148 +58,266 @@ def register(request):
 
 
 def register_customer(request):
-    if request.method == "POST":
-        # temporary while there is no register user data
-        name = "Dave"
-        sex = "M"
-        phone_number = "1234567890"
-        password = make_password("Dave1234")
-        birthdate = "2000-09-10"
-        address = "Street 1, LA"
-        """
-        name = request.POST['name']
+    if request.method == 'POST':
+
+        # Get data from POST request
+        username = request.POST['username']
         sex = request.POST['sex']
-        phone_number = request.POST['phone_number']
+        phonenum = request.POST['phonenum']
         password = make_password(request.POST['password'])
-        birthdate = request.POST['birthdate']
+        dob = request.POST['dob']
         address = request.POST['address']
-        """
-        # Customer.objects.create(
-        #     name = name,
-        #     sex = sex,
-        #     phone_number = phone_number,
-        #     password = password,
-        #     birthdate = birthdate,
-        #     address = address
-        # )
+        new_userid = str(uuid.uuid4())
+
+        try:
+            with connection.cursor() as cursor:
+
+                # Validate unique phone number
+                query_string1 = """
+                    SELECT COUNT(*)
+                    FROM "user"
+                    WHERE user.PhoneNum = %d
+                """
+                execute_sql_query(query_string1, [phonenum])
+
+                if cursor.fetchone()[0] > 0:
+                    messages.error(request, "Please use a different phone number, this phone number is registered already")
+                    return render(request, 'register_customer.html')
 
 
-        # For debugging
-        messages.success(request, "Customer registration successful!")
-        return redirect("login_user")
+                # Insert new user into USER table
+                # query_string2 = (
+                #     """
+                #     SELECT phonenum
+                #     FROM "user"
+                #     WHERE phonenum = %d
+                #     """
+                # )
+                
+                query_string2="""
+                INSERT INTO "USER" (userid, username, password, sex, phonenum, dob, address) 
+                VALUES (%s, %s, %s, %s, %d, %s, %s);
+                """
+                params_2 = [new_userid, username, password, sex, phonenum, dob, address]
 
-    # TODO: Check if the render is fine for customer
-    return render(request, "register_customer.html")
+                execute_sql_query(query_string2, params_2)
 
-    # Previous code
-    #
-    # if request.method == "POST":
-    #     form = CustomerRegistrationForm(request.POST)
-    #     if form.is_valid():
-    #         # Save user as a Customer
-    #         user = form.save(commit=False)
-    #         user.user_type = 'customer'
-    #         user.save()
-    #         messages.success(request, "Your account as a Customer has been successfully created!")
-    #         return redirect("main:login")
-    # else:
-    #     form = CustomerRegistrationForm()
+                query_string3=  """
+                INSERT INTO CUSTOMER (customerid, level) VALUES (%s, %d);
+                """
+                params_3 = [new_userid, 0]
+                
+                execute_sql_query(query_string3, params_3)
 
-    # context = {"form": form}
-    # return render(request, "register_customer.html", context)
+            messages.success(request, "Customer registration successful!")
+            return redirect('login_user')
+
+        except Exception as e:
+            messages.error(request, f"Error during registration: {str(e)}")
+
+    return render(request, 'register_customer.html')
 
 
 def register_worker(request):
-    if request.method == "POST":
-        name = request.POST["name"]
-        sex = request.POST["sex"]
-        phone_number = request.POST["phone_number"]
-        password = make_password(request.POST["password"])
-        birthdate = request.POST["birthdate"]
-        address = request.POST["address"]
+    if request.method == 'POST':
+        
+        # Fetch latest user ID from the database
+        with connection.cursor() as cursor:
+            cursor.execute("""SET search_path TO public; SELECT userid FROM "USER" ORDER BY userid DESC LIMIT 1;""")
+            latest_user = cursor.fetchone()
+            if latest_user:
+                new_userid = f"USR{int(latest_user[0][3:]) + 1:02d}"
+            else:
+                new_userid = "USR01"  # Default for first user
 
-        # Additional parameters to be filled for worker
-        bank_name = request.POST["bank_name"]
-        account_number = request.POST["account_number"]
-        npwp = request.POST["npwp"]
-        avatar_url = request.POST["avatar_url"]
+        # Get data from POST request
+        username = request.POST['username']
+        sex = request.POST['sex']
+        phonenum = request.POST['phonenum']
+        password = make_password(request.POST['password'])
+        dob = request.POST['dob']
+        address = request.POST['address']
 
-        # Worker.objects.create(
-        #     name = name,
-        #     sex = sex,
-        #     phone_number = phone_number,
-        #     password = password,
-        #     birthdate = birthdate,
-        #     address = address,
-        #     bank_name = bank_name,
-        #     account_number = account_number,
-        #     npwp = npwp,
-        #     avatar_url = avatar_url
-        # )
+        # Specific workers attributes
+        bankname = request.POST['bankname']
+        accnumber = request.POST['accnumber']
+        npwp = request.POST['npwp']
+        picurl = request.POST['picurl']
+        new_userid = str(uuid.uuid4())
 
+        try:
+            with connection.cursor() as cursor:
+                # Validate unique phone number
+                cursor.execute("""SET search_path TO public; SELECT COUNT(*) FROM "USER" WHERE phonenum = %s;""", [phonenum])
+                if cursor.fetchone()[0] > 0:
+                    messages.error(request, "Please use a different phone number, this phone number is registered already")
+                    return render(request, 'register_worker.html')
 
-        # For debugging
-        messages.success(request, "Worker registration successful!")
-        return redirect("login_user")
+                # Validate unique bank name and account number combination
+                cursor.execute("""SET search_path TO public; SELECT COUNT(*) FROM WORKER WHERE bankname = %s AND accnumber = %s;""",
+                               [bankname, accnumber])
+                if cursor.fetchone()[0] > 0:
+                    messages.error(request, "Please use a different bank name or account number")
+                    return render(request, 'register_worker.html')
 
-    # TODO: Check if the render is fine for customer
-    return render(request, "register_worker.html")
+                # Insert the new user into the USER table
+                cursor.execute("""
+                SET search_path TO public;
+                INSERT INTO "USER" (userid, username, password, sex, phonenum, dob, address) 
+                VALUES (%s, %s, %s, %s, %s, %s, %s);
+                """, [new_userid, username, password, sex, phonenum, dob, address])
 
-    # Previous code
-    #
-    # if request.method == "POST":
-    #     form = WorkerRegistrationForm(request.POST)
-    #     if form.is_valid():
-    #         # Save user as a Worker
-    #         user = form.save(commit=False)
-    #         user.user_type = 'worker'
-    #         user.save()
-    #         messages.success(request, "Your account as a Worker has been successfully created!")
-    #         return redirect("main:login")
-    # else:
-    #     form = WorkerRegistrationForm()
+                # Insert into the WORKER table
+                cursor.execute("""
+                INSERT INTO WORKER (workerid, bankname, accnumber, npwp, picurl) 
+                VALUES (%s, %s, %s, %s, %s);
+                """, [new_userid, bankname, accnumber, npwp, picurl])
 
-    # context = {"form": form}
-    # return render(request, "register_worker.html", context)
+            messages.success(request, "Worker registration successful!")
+            return redirect('login_user')
+
+        except Exception as e:
+            messages.error(request, f"Error during registration: {str(e)}")
+
+    return render(request, 'register_worker.html')
+
 
 
 def login_user(request):
     if request.method == "POST":
+        phonenum = request.POST.get('phonenumber')
+        password = request.POST.get('password')
 
-        phone_number = request.POST["phone_number"]
-        checked_password = check_password(request.POST["password"])
-        user = authenticate(
-            request, phone_number=phone_number, password=checked_password
-        )
+        # Ensure both fields are provided
+        if not phonenum or not password:
+            messages.error(request, "Phone number and password are required.")
+            return render(request, "login.html")
 
-        if user is not None:
-            login(request, user)
-            response = HttpResponseRedirect(reverse("main:show_main"))
-            response.set_cookie("last_login", str(datetime.datetime.now()))
-            return response
-        else:
-            messages.error(request, "Invalid phone number or password.")
+        try:
+            # Validate phone number and password
+            query = """SELECT "UserId", "Password" FROM "user" WHERE "PhoneNum" = %s;"""
+            user_data = execute_sql_query(query, [phonenum])
+            print(user_data)
+            if user_data:
+                user_id, stored_password = user_data[0]['UserId'], user_data[0]['Password']
+                print(user_id, stored_password)
+                if str(password) == str(stored_password):
+                    print("pass 1")
+                    # Determine user type (customer or worker)
+                    query_user_type = """SELECT "CustomerId" FROM "customer" WHERE "CustomerId" = %s;"""
+                    user_type_result = execute_sql_query(query_user_type, [user_id])
+                    user_type = "customer" if user_type_result else "worker"
+                    # Log in user and set cookies
+                    request.session["is_authenticated"] = True
+                    print("pass 2")
+                    request.session["user_id"] = user_id
+                    request.session["user_type"] = user_type
+                    
+                    # Simulated login
+                    login(request, user_id)
 
+                    # Set cookie for last login
+                    response = HttpResponseRedirect(reverse("main:show_main"))
+                    response.set_cookie("last_login", str(datetime.datetime.now()))
+
+                    return response
+                else:
+                    messages.error(request, "Invalid phone number or password.")
+            else:
+                messages.error(request, "Invalid phone number or password.")
+                
+        except Exception as e:
+            messages.error(request, f"An error occurred during login: {str(e)}")
+        
     return render(request, "login.html")
 
-    # Old Code
-    # else:
-    # For now, pass
-    # pass
-    # What should I change for this?
-    # Update: actually, let it go
-    # form = AuthenticationForm()
+# def login_user(request):
+#     if request.method == "POST":
+#         phonenum = request.POST.get('phonenum')
+#         password = request.POST.get('password')
 
-    # context = {"form": form}
-    # return render(request, "login.html", context)
+#         # Ensure both fields are provided
+#         if not phonenum or not password:
+#             messages.error(request, "Phone number and password are required.")
+#             return render(request, "login.html")
+
+#         try:
+#             with connection.cursor() as cursor:
+#                 # Validate phone number and password
+#                 query="""   
+#                     SELECT userid, password FROM "User" WHERE phonenum = %s;
+#                     """
+#                 user_data = execute_sql_query(query)
+
+#                 if user_data and check_password(password, user_data[1]):
+#                     user_id = user_data[0]
+
+#                     # Determine the user type
+#                     cursor.execute(
+#                         """SET search_path TO public;
+#                         SELECT customerid FROM CUSTOMER WHERE customerid = %s;""",
+#                         [user_id]
+#                     )
+#                     is_customer = cursor.fetchone()
+
+#                     if is_customer:
+#                         user_type = 'customer'
+#                     else:
+#                         user_type = 'worker'
+
+#                     # Log in user and set cookies
+#                     request.session['is_authenticated'] = True
+#                     request.session['user_id'] = user_id
+#                     request.session['user_type'] = user_type
+#                     login(request, user_id)  # Simulated login
+#                     response = HttpResponseRedirect(reverse("main:show_main"))
+#                     response.set_cookie("last_login", str(datetime.datetime.now()))
+#                     return response
+#                 else:
+#                     # Invalid credentials
+#                     messages.error(request, "Invalid phone number and password.")
+
+#         except Exception as e:
+#             messages.error(request, f"An error occurred during login: {str(e)}")
+#             return render(request, "login.html")
+
+#     return render(request, "login.html")
 
 
 def logout_user(request):
-    logout(request)
-    response = HttpResponseRedirect(reverse("main:landingpage"))
-    response.delete_cookie("last_login")
-    return response
+    request.session.flush()
+    return redirect("main:landingpage")
 
+
+def home(request):
+    user = request.user
+     
+    category_subcategory = """
+        SELECT 
+            sc.SCId AS CategoryId,
+            sc.Name AS CategoryName,
+            ssc.SSCId AS SubcategoryId,
+            ssc.Name AS SubcategoryName,
+            ssc.Description AS SubcategoryDescription
+        FROM 
+            service_category sc
+        JOIN 
+            service_subcategory ssc
+        ON 
+            sc.SCId = ssc.SCId
+        ORDER BY 
+            sc.Name, ssc.Name;
+    """
+    params = [user]
+    category_subcategory_result = execute_sql_query(category_subcategory, params)
+
+    context = {
+        "title": "Sparklean Homepage",
+        "user": user,
+        "category_subcategory_list": category_subcategory_result,
+    }
+
+    print(category_subcategory_result)
 
 def home(request):
     user = request.user
@@ -234,7 +365,6 @@ def home(request):
 
     # For debugging purpose
     # print(category_subcategory_result)
-
     return render(request, "home.html", context)
 
 
@@ -288,7 +418,6 @@ def subcategory(request):
         "testimonial_list": testimonial_list,
         "service_session_list": service_session_list,
     }
-    
     return render(request, "subcategory.html", context)
 
 
@@ -317,11 +446,9 @@ def worker_profile(request):
 
 
 def mypay(request):
-    user_id = "USR00"  # should be based on request
+    # user_id = 'USR00' # should be based on request
     # Proposed solution:
-    # user_id = request.user
-    print(user_id)
-
+    user_id = request.user
     user_query = """
         SELECT "PhoneNum", "MyPayBalance", "Username", "UserId"
         FROM "user"
@@ -352,6 +479,8 @@ def mypay(request):
     return render(request, "mypay.html", context)
 
 
+# TODO: Refactor to match the models
+@login_required(login_url="/landingpage")
 def mypay_transaction(request):
 
     user_id = request.user.id  # TODO should be based on request
@@ -422,7 +551,26 @@ def mypay_transaction(request):
     else:
         categories = []
 
-    context = {"states": categories, "services": services}
+    # get the selected transaction category from the dropdown
+    selected_category = request.GET.get('category', None)  # Default to None
+    # ensure selected category is one of the category options
+    is_valid_category = any(selected_category == category[0] for category in categories)
+    if not is_valid_category:
+        selected_category = None
+
+    form = None
+
+    if selected_category == 'top_up':
+        pass #form = TopUpForm()
+    elif selected_category == 'service_payment':
+        pass # Fetch services
+        services = [("1", "Service 1 - 500"), ("2", "Service 2 - 3000")]
+        pass #form = ServicePaymentForm()
+        form.fields['service_session'].choices = services
+    elif selected_category == 'transfer':
+        pass #form = TransferForm()
+    elif selected_category == 'withdrawal':
+        pass #form = WithdrawalForm()
 
     if request.method == "POST":
         print("POST request triggered")
@@ -916,14 +1064,13 @@ def discount(request):
 def myorder(request):
     return render(request, "myorder.html")
 
-
 @csrf_exempt
 def update_service_status(request, service_id):
     if request.method == "POST":
         data = json.loads(request.body)
         new_status = data.get("status")
 
-        try:
+        #try:
             # Update the service object in the database
             service = Service.objects.get(id=service_id)
             service.status = new_status
@@ -934,7 +1081,6 @@ def update_service_status(request, service_id):
                 {"success": False, "error": "Service not found"}, status=404
             )
     return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
-
 
 def landingpage(request):
     return render(request, "landingpage.html")
@@ -947,13 +1093,57 @@ def update_customer_profile(request):
 def update_worker_profile(request):
     return render(request, "update_worker_profile.html")
 
-
+@csrf_exempt
 @login_required(login_url="/landingpage")
 def update_customer_profile(request):
-    customer = request.user
+    userid = request.user.id
 
-    form = CustomerRegistrationForm(request.POST or None, instance=customer)
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        sex = request.POST.get('sex')
+        phonenum = request.POST.get('phonenum')
+        dob = request.POST.get('dob')
+        address = request.POST.get('address')
 
+        with connection.cursor() as cursor:
+            # Update the customer details
+            cursor.execute("""
+            UPDATE "USER" 
+            SET username = %s, sex = %s, phonenum = %s, dob = %s, address = %s
+            WHERE userid = %s;
+            """, [username, sex, phonenum, dob, address, userid])
+
+            # Update password if provided
+            if password:
+                cursor.execute("""
+                UPDATE "USER" 
+                SET password = %s 
+                WHERE userid = %s;
+                """, [make_password(password), userid])
+
+        messages.success(request, "Your profile has been updated successfully.")
+        return redirect(reverse('main:customer-profile'))
+
+    with connection.cursor() as cursor:
+        cursor.execute("""
+        SELECT id, username, sex, phonenum, dob, address
+        FROM "USER"
+        WHERE userid = %s;
+        """, [userid])
+        user = cursor.fetchone()
+
+    context = {
+        'user': {
+            'userid': user[0],
+            'username': user[1],
+            'sex': user[2],
+            'phonenum': user[3],
+            'dob': user[4],
+            'address': user[5]
+        }
+    }
+    return render(request, 'update_customer_profile.html', context)
     if form.is_valid() and request.method == "POST":
         form.save()
         messages.success(request, "Your profile has been updated successfully.")
@@ -961,24 +1151,83 @@ def update_customer_profile(request):
     else:
         form = CustomerRegistrationForm(instance=customer)
 
-    context = {"form": form}
-    return render(request, "update_customer_profile.html", context)
 
-
+@csrf_exempt
 @login_required(login_url="/landingpage")
 def update_worker_profile(request):
-    worker = request.user
-    if request.method == "POST":
-        form = WorkerRegistrationForm(request.POST, instance=worker)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Your profile has been updated successfully.")
-            return redirect("main:worker-profile")
-    else:
-        form = WorkerRegistrationForm(instance=worker)
+    userid = request.user.id
 
-    context = {"form": form}
-    return render(request, "update_worker_profile.html", context)
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        sex = request.POST.get('sex')
+        phonenum = request.POST.get('phonenum')
+        dob = request.POST.get('dob')
+        address = request.POST.get('address')
+        bankname = request.POST.get('bankname')
+        accnumber = request.POST.get('accnumber')
+        npwp = request.POST.get('npwp')
+        picurl = request.POST.get('picurl')
+
+        with connection.cursor() as cursor:
+            # Update the worker's user details
+            cursor.execute("""
+            UPDATE "USER" 
+            SET username = %s, sex = %s, phonenum = %s, dob = %s, address = %s
+            WHERE userid = %s;
+            """, [username, sex, phonenum, dob, address, userid])
+
+            # Update password if provided
+            if password:
+                cursor.execute("""
+                UPDATE "USER" 
+                SET password = %s 
+                WHERE userid = %s;
+                """, [make_password(password), userid])
+
+            # Update additional worker details
+            cursor.execute("""
+            UPDATE WORKER 
+            SET bankname = %s, accnumber = %s, npwp = %s, picurl = %s
+            WHERE id = %s;
+            """, [bankname, accnumber, npwp, picurl, userid])
+
+        messages.success(request, "Your profile has been updated successfully.")
+        return redirect(reverse('main:worker-profile'))
+
+    with connection.cursor() as cursor:
+        cursor.execute("""
+        SELECT id, uname, sex, phonenum, dob, uaddress
+        FROM "USER"
+        WHERE id = %s;
+        """, [userid])
+        user = cursor.fetchone()
+
+        cursor.execute("""
+        SELECT bankname, accnumber, npwp, picurl
+        FROM WORKER
+        WHERE id = %s;
+        """, [userid])
+        worker = cursor.fetchone()
+
+    context = {
+        'user': {
+            'id': user[0],
+            'username': user[1],
+            'sex': user[2],
+            'phonenum': user[3],
+            'dob': user[4],
+            'address': user[5]
+        },
+        'worker': {
+            'bank_name': worker[0],
+            'acc_number': worker[1],
+            'npwp': worker[2],
+            'pic_url': worker[3]
+        }
+    }
+    return render(request, 'update_worker_profile.html', context)
+
 
 
 def worker_profile_summary(request):

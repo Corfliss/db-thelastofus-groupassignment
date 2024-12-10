@@ -15,21 +15,73 @@
             <h2 class="text-center text-3xl font-extrabold text-black">Create Worker Account</h2>
             <form class="mt-8 space-y-6" method="POST" action="{% url 'main:register_worker' %}">
                 {% csrf_token %}
-                <div class="rounded-md shadow-sm -space-y-px">
-                    {% for field in form %}
-                    <div class="{% if not forloop.first %}mt-4{% endif %}">
-                        <label for="{{ field.id_for_label }}" class="mb-2 font-semibold text-black">{{ field.label }}</label>
-                        <div class="relative">{{ field }}</div>
-                        {% if field.errors %}
-                        {% for error in field.errors %}
-                            <p class="mt-1 text-sm text-red-600">{{ error }}</p>
-                        {% endfor %}
-                        {% endif %}
-                    </div>
-                    {% endfor %}
+                
+                <div class="mb-4">
+                    <label for="username" class="block font-semibold text-black mb-1">Name</label>
+                    <input type="text" id="username" name="username" class="w-full border rounded-md py-2 px-3" required>
                 </div>
+
+                <div class="mb-4">
+                    <label for="password" class="block font-semibold text-black mb-1">Password</label>
+                    <input type="password" id="password" name="password" class="w-full border rounded-md py-2 px-3" required>
+                </div>
+
+                <div class="mb-4">
+                    <label for="confirm_password" class="block font-semibold text-black mb-1">Confirm Password</label>
+                    <input type="password" id="confirm_password" name="confirm_password" class="w-full border rounded-md py-2 px-3" required>
+                </div>
+
+                <div class="mb-4">
+                    <label for="sex" class="block font-semibold text-black mb-1">Sex</label>
+                    <select id="sex" name="sex" class="w-full border rounded-md py-2 px-3" required>
+                        <option value="M">Male</option>
+                        <option value="F">Female</option>
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label for="phonenum" class="block font-semibold text-black mb-1">Phone Number</label>
+                    <input type="text" id="phonenum" name="phonenum" class="w-full border rounded-md py-2 px-3" required>
+                </div>
+
+                <div class="mb-4">
+                    <label for="dob" class="block font-semibold text-black mb-1">Birth Date</label>
+                    <input type="date" id="dob" name="dob" class="w-full border rounded-md py-2 px-3" required>
+                </div>
+
+                <div class="mb-4">
+                    <label for="address" class="block font-semibold text-black mb-1">Address</label>
+                    <textarea id="address" name="address" class="w-full border rounded-md py-2 px-3 resize-y" rows="3" required></textarea>
+                </div>
+
+                <div class="mb-4">
+                    <label for="bankname" class="block font-semibold text-black mb-1">Bank Name</label>
+                    <select id="bankname" name="bankname" class="w-full border rounded-md py-2 px-3" required>
+                        <option value="GoPay">GoPay</option>
+                        <option value="OVO">OVO</option>
+                        <option value="Virtual Account BCA">Virtual Account BCA</option>
+                        <option value="Virtual Account BNI">Virtual Account BNI</option>
+                        <option value="Virtual Account Mandiri">Virtual Account Mandiri</option>
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label for="accnumber" class="block font-semibold text-black mb-1">Account Number</label>
+                    <input type="text" id="accnumber" name="accnumber" class="w-full border rounded-md py-2 px-3" required>
+                </div>
+
+                <div class="mb-4">
+                    <label for="npwp" class="block font-semibold text-black mb-1">NPWP</label>
+                    <input type="text" id="npwp" name="npwp" class="w-full border rounded-md py-2 px-3" required>
+                </div>
+
+                <div class="mb-4">
+                    <label for="picurl" class="block font-semibold text-black mb-1">Image URL</label>
+                    <input type="url" id="picurl" name="picurl" class="w-full border rounded-md py-2 px-3" required>
+                </div>
+
                 <div>
-                    <button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#2299A8] hover:bg-[#1C677E] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                    <button type="submit" class="w-full flex justify-center py-2 px-4 text-sm font-medium rounded-md text-white bg-[#2299A8] hover:bg-[#1C677E]">
                         Register as Worker
                     </button>
                 </div>
