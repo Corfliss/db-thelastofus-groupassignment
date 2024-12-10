@@ -12,31 +12,35 @@
 <div class="body">
 <div class="container">
     <!-- Filter Section -->
-    <form method="GET" action="" class="filter-form">
+    <form method="POST" action="" class="filter-form">
+        {% csrf_token %}
         <div class="header">
-            
             <!-- Filter by Service Category -->
-            <select name="status" class="form-select">
-                <option value="">Category</option>
+            <label for="category">Service Category:</label>
+            <select class="form-select" id="category" name="category" onchange="filterSubcategories()">
+                <option value="">--Select--</option>
                 {% for category in categories %}
-                <option value="{{ category }}" {% if category == request.GET.category %}selected{% endif %}>
-                    {{ category }}
+                <option value="{{ category.CategoryId }}" {% if category.CategoryId == request.POST.category %}selected{% endif %}>
+                    {{ category.Name }}
                 </option>
                 {% endfor %}
             </select>
 
             <!-- Filter by Service Subcategory -->
-            <select name="status" class="form-select">
-                <option value="">Subcategory</option>
+            <label for="subcategory">Service Subcategory:</label>
+            <select id="subcategory" name="subcategory" class="form-select">
+                <option value="" data-category="">--Select--</option>
                 {% for subcategory in subcategories %}
-                <option value="{{ subcategory }}" {% if subcateogry == request.GET.subcategory %}selected{% endif %}>
-                    {{ subcategory }}
+                <option value="{{ subcategory.SSCId }}" data-category="{{ subcategory.SCId }}"
+                    {% if subcategory.SSCId == request.POST.subcategory %}selected{% endif %}>
+                    {{ subcategory.Name }}
                 </option>
                 {% endfor %}
             </select>
             
+            
             <!-- Search Button -->
-            <button type="submit" class="right-flex-container action-btn">Search</button>
+            <button type="submit" name="search" class="right-flex-container action-btn">Search</button>
         </div>
     </form>
 
@@ -50,25 +54,28 @@
                 <th>Service Subcategory Name</th>
                 <th>User's Name</th>
                 <th>Order Date</th>
-                <th>Working Date</th>
                 <th>Session</th>
-                <th>Total Amout</th>
+                <th>Total Amount</th>
                 <th>Accept Order</th>
             </tr>
             {% for service in services %}
             <tr>
-              <td>{{ service.subcategory_name }}</td>
-              <td>{{ service.user_name }}</td>
-              <td>{{ service.order_date }}</td>
-              <td>{{ service.working_date }}</td>
-              <td>{{ service.session }}</td>
-              <td>{{ service.total_amount }}</td>
+              <td>{{ service.ServiceName }}</td>
+              <td>{{ service.Username }}</td>
+              <td>{{ service.OrderDate }}</td>
+              <td>{{ service.Session }}</td>
+              <td>{{ service.TotalPrice }}</td>
               <td>
-                <button 
-                  class="update-button" 
-                  onclick="">
-                  Accept Order
-                </button>
+                <form method="POST">
+                    {% csrf_token %}
+                    <button 
+                        class="update-button"
+                        type="submit" 
+                        name="accept_order" 
+                        value="{{ service.Id }}">
+                        Accept Order
+                    </button>
+                </form>
               </td>
             </tr>
             {% endfor %}
@@ -76,4 +83,47 @@
     </div>
 </div>
 </div>
+<script>
+     function filterSubcategories() {
+        
+        // Get the selected category value
+        const selectedCategory = document.getElementById("category").value;
+
+        // Get all subcategory options
+        const subcategorySelect = document.getElementById("subcategory");
+        const subcategoryOptions = subcategorySelect.querySelectorAll("option");
+
+        // If no category is selected, hide all subcategories and reset the dropdown
+        if (!selectedCategory) {
+            subcategoryOptions.forEach(option => {
+                option.style.display = "none"; // Hide all options
+            });
+            subcategorySelect.value = ""; // Reset the dropdown to "--Select--"
+            return;
+        }
+
+        // Loop through subcategory options and filter by data-category
+        subcategoryOptions.forEach(option => {
+            const categoryId = option.getAttribute("data-category"); // empty for --SELECT--
+            if (categoryId === "" || categoryId === selectedCategory) {
+                option.style.display = ""; // Show matching options
+            } else {
+                option.style.display = "none"; // Hide non-matching options
+            }
+        });
+
+        // Reset subcategory selection if no match
+        const firstVisibleOption = [...subcategoryOptions].find(opt => opt.style.display === "");
+        if (firstVisibleOption) {
+            subcategorySelect.value = firstVisibleOption.value;
+        } else {
+            subcategorySelect.value = ""; // Reset if no valid option
+        }
+    }
+
+    // Run filterSubcategories on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        filterSubcategories();
+    });
+</script>
 {% endblock content %}

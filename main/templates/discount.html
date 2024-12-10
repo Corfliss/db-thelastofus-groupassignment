@@ -13,77 +13,73 @@
 <div class="container">
     <h2>Discount</h2>
 
-    <!-- Voucher Section -->
-    <div class="voucher-section">
-        <div class="voucher-header">
-            <span>Voucher</span>
-        </div>
-        <table class="voucher-table">
-            <tr>
-                <th>Code</th>
-                <th>Discount</th>
-                <th>Min Tr Order</th>
-                <th>Number Day Valid</th>
-                <th>User Quota</th>
-                <th>Price</th>
-                <th>Action</th>
-            </tr>
-            <!-- Example Row 1 -->
-            <tr>
-                <td>VOUCHER10</td>
-                <td>10%</td>
-                <td>$50</td>
-                <td>30 days</td>
-                <td>100</td>
-                <td>$5</td>
-                <td><button class="buy-btn">Buy</button></td>
-            </tr>
-            <!-- Example Row 2 -->
-            <tr>
-                <td>VOUCHER20</td>
-                <td>20%</td>
-                <td>$100</td>
-                <td>15 days</td>
-                <td>50</td>
-                <td>$10</td>
-                <td><button class="buy-btn">Buy</button></td>
-            </tr>
-            <!-- Example Row 3 -->
-            <tr>
-                <td>VOUCHER30</td>
-                <td>30%</td>
-                <td>$150</td>
-                <td>10 days</td>
-                <td>30</td>
-                <td>$15</td>
-                <td><button class="buy-btn">Buy</button></td>
-            </tr>
+<!-- Voucher Section -->
+<div class="p-4 border-4 border-black mb-4">
+    <p class="text-lg font-bold mb-4">Vouchers</p>
+    {% if vouchers %}
+        <table class="table-auto w-full border-collapse border border-gray-400 text-left">
+            <thead>
+                <tr class="bg-gray-200">
+                    <th class="border border-gray-400 px-4 py-2">Code</th>
+                    <th class="border border-gray-400 px-4 py-2">Discount (%)</th>
+                    <th class="border border-gray-400 px-4 py-2">Min Tr Order</th>
+                    <th class="border border-gray-400 px-4 py-2">Valid For (days)</th>
+                    <th class="border border-gray-400 px-4 py-2">User Quota</th>
+                    <th class="border border-gray-400 px-4 py-2">Price ($)</th>
+                    <th class="border border-gray-400 px-4 py-2">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for voucher in vouchers %}
+                <tr class="hover:bg-gray-100">
+                    <td class="border border-gray-400 px-4 py-2">{{ voucher.Code }}</td>
+                    <td class="border border-gray-400 px-4 py-2">{{ voucher.Discount }}</td>
+                    <td class="border border-gray-400 px-4 py-2">{{ voucher.MinTrOrder }}</td>
+                    <td class="border border-gray-400 px-4 py-2">{{ voucher.NmbDayValid }}</td>
+                    <td class="border border-gray-400 px-4 py-2">{{ voucher.UserQuota }}</td>
+                    <td class="border border-gray-400 px-4 py-2">${{ voucher.Price }}</td>
+                    <td class="border border-gray-400 px-4 py-2 text-center">
+                        <button 
+                            class="rounded-md bg-green-600 py-1 px-3 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-green-700 focus:shadow-none active:bg-green-700 hover:bg-green-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none" 
+                            type="button">
+                            Buy
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
         </table>
-    </div>
-
-    <!-- Promo Section -->
-    <div class="promo-section">
-        <div class="promo-header">
-            <span>Promo</span>
-        </div>
-        <table class="promo-table">
-            <tr>
-                <th>Code</th>
-                <th>Offer End Date</th>
-            </tr>
-            <!-- Example Row 1 -->
-            <tr>
-                <td>PROMO5</td>
-                <td>2024-12-31</td>
-            </tr>
-            <!-- Example Row 2 -->
-            <tr>
-                <td>PROMO10</td>
-                <td>2024-11-30</td>
-            </tr>
-        </table>
-    </div>
+    {% else %}
+        <p class="text-center text-gray-500">No vouchers available at the moment.</p>
+    {% endif %}
 </div>
+
+
+<!-- Promo Section -->
+<div class="mb-8">
+    <p class="text-lg font-bold mb-4">Promotions</p>
+    {% if promo %}
+    <table class="table-auto w-full border-collapse border border-gray-400 text-left">
+        <thead>
+            <tr class="bg-gray-200">
+                <th class="border border-gray-400 px-4 py-2">Code</th>
+                <th class="border border-gray-400 px-4 py-2">Offer End Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in promo %}
+            <tr class="hover:bg-gray-100">
+                <td class="border border-gray-400 px-4 py-2">{{ p.Code }}</td>
+                <td class="border border-gray-400 px-4 py-2">{{ p.OfferEndDate }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="text-center text-gray-500">No promotions available at the moment.</p>
+    {% endif %}
+</div>
+
 
 </body>
 {% endblock style %}

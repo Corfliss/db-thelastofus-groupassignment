@@ -15,7 +15,7 @@
             MyPay Transaction
         </div>
         
-        <!-- Transaction Category Dropdown -->
+        <!-- Transaction Category Dropdown Old 
         <div class="mb-4">
             <label for="category-select">Transaction Category</label>
             <select id="category-select" class="form-select">
@@ -28,7 +28,6 @@
             {% endif %}
         </div>
 
-        <!-- Form Area -->
         <form method="POST" action="">
             {% csrf_token %}
             {% for field in form %}
@@ -54,15 +53,97 @@
             {% endif %}
         </form>
     </div>
+-->
+    <div>
+    <form method="POST" class="mb-4">
+        {% csrf_token %}
+        <label for="state">Select Transaction Type:</label>
+        <select id="state" name="state" onchange="updateForm()">
+            <option value="">--Select--</option>
+            {% for value in states %}
+            <option value="{{value}}">{{value}}</option>
+            {% endfor %}
+        </select>
+
+        <div id="Top Up" class="form-section" style="display:none;">
+            <label for="top_up_amount" class="big-label">Top-Up Amount:</label>
+            <input type="number" name="top_up_amount" step="0.01" class="text-input-box"/>
+        </div>
+
+        <div id="Service Payment" class="form-section" style="display:none;">
+            <label for="service_id" class="big-label">Service Session Selection:</label>
+            <select name="service_id" id="service_id" onchange="updateServicePrice(this)">
+                <option value="" data-price="0">--Select--</option>
+                {% for service in services %}
+                    <option value="{{ service.Id }}" data-price="{{ service.TotalPrice }}">{{ service.Name }} Session {{ service.Session }}</option>
+                {% endfor %}
+            </select>
+            <label for="service_price" class="big-label">Service Price:</label>
+            <input type="number" name="service_price" id="service_price" step="0.01" class="text-input-box" readonly/>
+        </div>
+
+        <div id="Transfer" class="form-section" style="display:none;">
+            <label for="recipient_phone" class="big-label">Recipient's Phone Number:</label>
+            <input type="text" name="recipient_phone" class="text-input-box"/>
+            <label for="transfer_amount" class="big-label">Transfer Amount:</label>
+            <input type="number" name="transfer_amount" step="0.01" class="text-input-box"/>
+        </div>
+
+        <div id="Withdrawal" class="form-section" style="display:none;">
+            <label for="bank_name" class="big-label">Bank Name:</label>
+            <select name="bank_name">
+                <option value="GoPay">GoPay</option>
+                <option value="OVO">OVO</option>
+                <option value="Virtual Account BCA">Virtual Account BCA</option>
+                <option value="BNI">BNI</option>
+                <option value="Mandiri">Mandiri</option>
+            </select>
+            <label for="bank_account" class="big-label">Bank Account Number:</label>
+            <input type="text" name="bank_account" class="text-input-box"/>
+            <label for="withdrawal_amount" class="big-label">Withdrawal Amount:</label>
+            <input type="number" name="withdrawal_amount" step="0.01" class="text-input-box"/>
+        </div>
+
+        <div class="mt-3 text-center">
+            <button type="submit" class="action-btn" style="width: 40%;">Confirm</button>
+        </div>
+    </form>
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    </div>
 </div>
 
 <script>
-    // Handle category changes
-    document.getElementById('category-select').addEventListener('change', function() {
-        const selectedCategory = this.value;
-        const currentUrl = new URL(window.location.href);
-        currentUrl.searchParams.set('category', selectedCategory);
-        window.location.href = currentUrl.toString(); // Reload the page with the new category
+    function updateForm() {
+        const state = document.getElementById('state').value;
+        document.querySelectorAll('.form-section').forEach(section => section.style.display = 'none');
+        if (state) {
+            document.getElementById(state).style.display = 'block';
+        }
+    }
+
+    document.querySelector('form').addEventListener('submit', function(event) {
+        // Perform validation
+        const state = document.querySelector('#state').value;
+        if (!state) {
+            event.preventDefault();
+            alert("Please select a transaction type.");
+        }
     });
+
+    // Update the service price based on the selected service
+    function updateServicePrice(selectElement) {
+        const service = document.getElementById('service_id').value;
+        console.log("doing stuff yeah");
+        const selectedOption = selectElement.options[selectElement.selectedIndex];
+        const price = selectedOption.getAttribute('data-price');
+        document.getElementById('service_price').value = price || '';
+    }
+
 </script>
 {% endblock content %}

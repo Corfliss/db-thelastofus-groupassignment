@@ -18,8 +18,23 @@
           </svg>
         </button>
       </div>
-      <div id="dropdown" class="absolute left-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
-        <!-- Active: "bg-gray-100 text-gray-900 outline-none", Not Active: "text-gray-700" -->
+      <div id="dropdown" class="absolute left-0 z-10 mt-2 w-96 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+        <!-- Dynamic Dropdown -->
+        {% for category_id, category_data in categories.items %}
+        <div>
+            <!-- Category Name -->
+            <a href="#" class="block px-4 py-2 text-l font-bold" role="menuitem" tabindex="-1">{{ category_data.name }}</a>
+            <!-- Subcategories -->
+            {% for subcategory in category_data.subcategories %}
+            <a href="{% url 'subcategory' %}?subcategory_id={{ subcategory.id }}" class="block px-6 text-sm text-gray-700">
+                <strong>{{ subcategory.name }}</strong>
+            </a>
+            {% endfor %}
+        </div>
+        {% endfor %}
+      </div>
+      <!-- <div id="dropdown" class="absolute left-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+        Active: "bg-gray-100 text-gray-900 outline-none", Not Active: "text-gray-700"
         <div>
           <a href="#" class="block px-4 py-2 text-l" role="menuitem" tabindex="-1" id="menu-item-0">Category 1</a>
           <p class="block px-6 text-sm text-gray-700">Subcategory 1</p>
@@ -39,7 +54,7 @@
           <p class="block px-6 text-sm text-gray-700">Subcategory 3</p>
         </div>
         <div class="mt-4"></div>
-      </div>
+      </div> -->
     </div>    
     <div>
       <span class="align-middle text-xl">Subcategory Name</span>
