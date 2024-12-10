@@ -29,7 +29,7 @@ def execute_sql_query(query, params=None):
 @login_required(login_url="/landingpage")
 def show_main(request):
     context = {
-        "title": "Welcome to Sijarta",
+        "title": "Welcome to Sparklean",
         "last_login": request.COOKIES["last_login"],
     }
     return render(request, "home.html", context)
@@ -42,7 +42,7 @@ def register_customer(request):
     if request.method == 'POST':
         # Fetch the latest user ID from the database
         with connection.cursor() as cursor:
-            cursor.execute("""SET search_path TO pulic; SELECT userid FROM "USER" ORDER BY userid DESC LIMIT 1;""")
+            cursor.execute("""SET search_path TO public; SELECT userid FROM "USER" ORDER BY userid DESC LIMIT 1;""")
             latest_user = cursor.fetchone()
             if latest_user:
                 new_user_id = f"USR{int(latest_user[0][3:]) + 1:02d}"
@@ -61,7 +61,7 @@ def register_customer(request):
             with connection.cursor() as cursor:
                 # Insert the new user into the USER table
                 cursor.execute("""
-                SET search_path TO sijartagroupassignment;
+                SET search_path TO public;
                 INSERT INTO "USER" (userid, username, pwd, sex, phonenum, dob, address) 
                 VALUES (%s, %s, %s, %s, %s, %s, %s);
                 """, [new_user_id, username, password, sex, phonenum, birthdate, address])
@@ -109,7 +109,7 @@ def register_worker(request):
             with connection.cursor() as cursor:
                 # Insert the new user into the USER table
                 cursor.execute("""
-                SET search_path TO sijartagroupassignment;
+                SET search_path TO public;
                 INSERT INTO "USER" (userid, username, pwd, sex, phonenum, dob, address) 
                 VALUES (%s, %s, %s, %s, %s, %s, %s);
                 """, [new_user_id, username, password, sex, phonenum, birthdate, address])
@@ -348,7 +348,7 @@ def service_job_status(request):
 
 
 def service_booking(request):
-    context = {"title": "Sijarta Service Booking"}
+    context = {"title": "Sparklean Service Booking"}
     return render(request, "service_booking.html", context)
 
 
