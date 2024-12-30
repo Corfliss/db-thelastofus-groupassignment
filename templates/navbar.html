@@ -7,14 +7,14 @@
 
       <!-- Navbar Section for Authenticated Users -->
       <div class="hidden md:flex items-center space-x-8">
-        {% if user.is_authenticated %}
-          {% if user.user_type == "worker" %}
+        {% if request.session.user_id %}
+          {% if request.session.user_type == "worker" %}
             <!-- Worker Navbar -->
             <a>
-              <span class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">{{ user.user_type }}</span>
+              <span class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">{{ request.session.user_type }}</span>
             </a>
             <a>
-              <span class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">{{ user.username }}</span>
+              <span class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">{{ username }}</span>
             </a>
             <a href="{% url 'main:home' %}" class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">
               Home
@@ -34,10 +34,10 @@
           {% else %}
             <!-- Customer Navbar -->
             <a>
-              <span class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">{{ user.user_type }}</span>
+              <span class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">{{ request.session.user_type }}</span>
             </a>
             <a>
-              <span class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">{{ user.username }}</span>
+              <span class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">{{ username }}</span>
             </a>
             <a href="{% url 'main:home' %}" class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">
               Home
@@ -74,8 +74,8 @@
   <!-- Mobile menu for smaller screens -->
   <div class="mobile-menu hidden md:hidden px-4 w-full md:max-w-full">
     <div class="pt-2 pb-3 space-y-1 mx-auto">
-      {% if user.is_authenticated %}
-        <span class="block text-gray-300 px-3 py-2">Welcome, {{ user.username }}</span>
+      {% if request.session.user_id %}
+        <span class="block text-gray-300 px-3 py-2">Welcome, {{ request.session.username }}</span>
         <a href="{% url 'main:logout' %}" class="block text-center bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition duration-300">
           Logout
         </a>

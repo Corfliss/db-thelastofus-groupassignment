@@ -43,10 +43,8 @@ def execute_sql_query(query, params=None):
         return None
 
 
-@login_required(login_url="/landingpage")
 def show_main(request):
     context = {
-        "title": "Welcome to Sparklean",
         "last_login": request.COOKIES["last_login"],
     }
     return render(request, "home.html", context)
@@ -181,17 +179,17 @@ def register_worker(request):
 
     return render(request, 'register_worker.html')
 
-
+## LOGIN ##
 
 def login_user(request):
     if request.method == "POST":
         phonenum = request.POST.get('phonenumber')
         password = request.POST.get('password')
 
-        # Ensure both fields are provided
+        # Validation for input
         if not phonenum or not password:
             messages.error(request, "Phone number and password are required.")
-            return render(request, "login.html")
+            return render(request, 'login.html')
 
         try:
             # Validate phone number and password
@@ -203,24 +201,24 @@ def login_user(request):
                 print(user_id, stored_password)
                 if str(password) == str(stored_password):
                     print("pass 1")
-                    # Determine user type (customer or worker)
+                    
+                    # User type assignment
                     query_user_type = """SELECT "CustomerId" FROM "customer" WHERE "CustomerId" = %s;"""
                     user_type_result = execute_sql_query(query_user_type, [user_id])
                     user_type = "customer" if user_type_result else "worker"
-                    # Log in user and set cookies
+                    
+                    # Set session
                     request.session["is_authenticated"] = True
                     print("pass 2")
                     request.session["user_id"] = user_id
                     request.session["user_type"] = user_type
-                    
-                    # Simulated login
-                    login(request, user_id)
 
-                    # Set cookie for last login
-                    response = HttpResponseRedirect(reverse("main:show_main"))
+                    # Set cookie
+                    response = HttpResponseRedirect(reverse("main:show_main")) 
                     response.set_cookie("last_login", str(datetime.datetime.now()))
 
                     return response
+                
                 else:
                     messages.error(request, "Invalid phone number or password.")
             else:
@@ -230,6 +228,7 @@ def login_user(request):
             messages.error(request, f"An error occurred during login: {str(e)}")
         
     return render(request, "login.html")
+
 
 # def login_user(request):
 #     if request.method == "POST":
@@ -760,7 +759,8 @@ def mypay_transaction(request):
         except Exception as e:
             messages.error(request, f"Error: {e}")
 
-    return render(request, "mypaytransaction.html", context)
+    return render(request, "mypaytransaction.html")
+#   return render(request, "mypaytransaction.html", context)
 
 
 # Testimony R
@@ -1064,23 +1064,24 @@ def discount(request):
 def myorder(request):
     return render(request, "myorder.html")
 
-@csrf_exempt
-def update_service_status(request, service_id):
-    if request.method == "POST":
-        data = json.loads(request.body)
-        new_status = data.get("status")
+# @csrf_exempt
+# def update_service_status(request, service_id):
+#     if request.method == "POST":
+#         data = json.loads(request.body)
+#         new_status = data.get("status")
 
-        #try:
-            # Update the service object in the database
-            service = Service.objects.get(id=service_id)
-            service.status = new_status
-            service.save()
-            return JsonResponse({"success": True})
-        except Service.DoesNotExist:
-            return JsonResponse(
-                {"success": False, "error": "Service not found"}, status=404
-            )
-    return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
+#         try:
+#             # Update the service object in the database
+#             service = Service.objects.get(id=service_id)
+#             service.status = new_status
+#             service.save()
+#             return JsonResponse({"success": True})
+#         except Service.DoesNotExist:
+#             return JsonResponse(
+#                 {"success": False, "error": "Service not found"}, status=404
+#             )
+#     return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
+
 
 def landingpage(request):
     return render(request, "landingpage.html")
