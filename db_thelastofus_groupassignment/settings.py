@@ -41,13 +41,14 @@ ALLOWED_HOSTS = [
     "127.0.0.1",
     "db-thelastofus-groupassignment.onrender.com",
     "naim.baziz-dbthelastofus.pbp.cs.ui.ac.id",
-    "naim-baziz-dbthelastofus.pbp.cs.ui.ac.id",
     "naim-baziz-dbproject.pbp.cs.ui.ac.id",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://naim-baziz-dbthelastofus.pbp.cs.ui.ac.id/",
-    "http://naim-baziz-dbthelastofus.pbp.cs.ui.ac.id/",
+    "https://naim-baziz-dbthelastofus.pbp.cs.ui.ac.id",
+    "http://naim-baziz-dbthelastofus.pbp.cs.ui.ac.id",
+    "http://naim-baziz-dbproject.pbp.cs.ui.ac.id",
+    "https://naim-baziz-dbproject.pbp.cs.ui.ac.id",
 ]
 
 # Application definition

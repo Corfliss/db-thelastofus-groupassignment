@@ -30,11 +30,11 @@ from main.views import (
 app_name = "main"
 
 urlpatterns = [
+    path("", views.home, name="home"),
     path("", show_main, name="show_main"),
     path("register/", register, name="register"),
     path("login/", login_user, name="login"),
     path("logout/", logout_user, name="logout"),
-    path("", views.home, name="home"),
     path("subcategory/", subcategory, name="subcategory"),
     path("customer-profile/", customer_profile, name="customer-profile"),
     path("worker-profile/", worker_profile, name="worker-profile"),
