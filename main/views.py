@@ -41,8 +41,12 @@ def execute_sql_query(query, params=None):
 
 
 def show_main(request):
+    try:
+        last_login = request.COOKIES["last_login"]
+    except:
+        last_login = "No last login"
     context = {
-        "last_login": request.COOKIES["last_login"],
+        "last_login": last_login,
     }
     return render(request, "home.html", context)
 
@@ -463,7 +467,7 @@ def mypay(request):
 # TODO: Refactor to match the models
 def mypay_transaction(request):
 
-    user_id = request.user.id  # TODO should be based on request
+    user_id = request.session["user_id"]
     account = None
 
     # try to query userid in customer
@@ -484,11 +488,11 @@ def mypay_transaction(request):
             WHERE "WorkerId" = %s
         """
         worker_result = execute_sql_query(worker_query, [user_id])
-        if len(customer_result) > 0:
+        if len(worker_result) > 0:
             account = "worker"
 
     # if doesn't exist, then user neither customer nor worker
-
+    '''
     update_query = """
                     UPDATE tr_order_status 
                     SET "StatusId" = %s
@@ -496,6 +500,7 @@ def mypay_transaction(request):
                     """
     params = ["STI02", "STI00"]
     result = execute_sql_query(update_query, params)
+    '''
     # organize the service categories
     categories = []
     services = []
@@ -531,38 +536,21 @@ def mypay_transaction(request):
     else:
         categories = []
 
-    # get the selected transaction category from the dropdown
-    selected_category = request.GET.get('category', None)  # Default to None
-    # ensure selected category is one of the category options
-    is_valid_category = any(selected_category == category[0] for category in categories)
-    if not is_valid_category:
-        selected_category = None
-
-    form = None
-
-    if selected_category == 'top_up':
-        pass #form = TopUpForm()
-    elif selected_category == 'service_payment':
-        pass # Fetch services
-        services = [("1", "Service 1 - 500"), ("2", "Service 2 - 3000")]
-        pass #form = ServicePaymentForm()
-        form.fields['service_session'].choices = services
-    elif selected_category == 'transfer':
-        pass #form = TransferForm()
-    elif selected_category == 'withdrawal':
-        pass #form = WithdrawalForm()
+    context = {"states": categories, "services": services}
 
     if request.method == "POST":
         print("POST request triggered")
 
         state = request.POST.get("state")
-        user_id = "USR00"  # should be based on request
 
         try:
             # Handle each state
             if state == "Top Up":
                 print("MyPay Top Up")
-                amount = float(request.POST.get("top_up_amount"))
+                try:
+                    amount = float(request.POST.get("top_up_amount"))
+                except:
+                    raise ValueError("Top-up amount must be a number.")
                 if amount <= 0:
                     raise ValueError("Top-up amount must be positive.")
 
@@ -641,7 +629,10 @@ def mypay_transaction(request):
             elif state == "Transfer":
                 print("MyPay Transfer")
                 recipient_phone = request.POST.get("recipient_phone")
-                amount = float(request.POST.get("transfer_amount"))
+                try:
+                    amount = float(request.POST.get("transfer_amount"))
+                except:
+                    raise ValueError("Transfer amount must be a number.")
                 if amount <= 0:
                     raise ValueError("Transfer amount must be positive.")
 
@@ -706,7 +697,11 @@ def mypay_transaction(request):
                 print("MyPay Withdrawal")
                 bank_name = request.POST.get("bank_name")
                 account_number = request.POST.get("bank_account")
-                withdrawal_amount = float(request.POST.get("withdrawal_amount"))
+                
+                try:
+                    withdrawal_amount = float(request.POST.get("withdrawal_amount"))
+                except:
+                    raise ValueError("Withdrawal amount must be a number.")
                 if withdrawal_amount <= 0:
                     raise ValueError("Withdrawal amount must be positive.")
 
@@ -740,8 +735,7 @@ def mypay_transaction(request):
         except Exception as e:
             messages.error(request, f"Error: {e}")
 
-    return render(request, "mypaytransaction.html")
-#   return render(request, "mypaytransaction.html", context)
+    return render(request, "mypaytransaction.html", context)
 
 
 # Testimony R
@@ -753,7 +747,7 @@ def view_testimony(request):
     return render(request, "subcategory.html", context)
 
 def service_job(request):
-    user_id = request.user.id
+    user_id = request.session["user_id"]
     # fetch which categories worker is registered for
     categories_query = """
         SELECT w."SCId" AS "CategoryId", s."Name"
@@ -912,7 +906,7 @@ def service_job_status(request):
     execute_sql_query(update_status_query, params)
     '''
 
-    user_id = request.user.id # TODO user switch
+    user_id = request.session["user_id"]
     filter_status = request.GET.get('status', '')
     filter_order_name = request.GET.get('order_name', '')
 
