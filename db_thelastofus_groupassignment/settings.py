@@ -137,7 +137,7 @@ if DEBUG:
         BASE_DIR / "static"  # refers to /static root project in development mode
     ]
 else:
-    STATIC_ROOT = BASE_DIR / "staticfiles"
+    STATIC_ROOT = BASE_DIR / "static"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

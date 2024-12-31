@@ -10,15 +10,15 @@
 
 <div class="body max-w-3xl mx-auto bg-white rounded-xl" style="padding-top: 100px;">
     <div class="flex flex-col justify-center items-center">
-        <h1 class="text-center text-3xl mb-4 font-extrabold text-black">My Profile</h1>
-        <div class="text-left">
-            <p>Name: {{ user.username }}</p>
-            <p>Level: 5</p>
-            <p>Sex: {{ user.sex }}</p>
-            <p>Phone Number: {{ user.phone_number }}</p>
-            <p>Birth Date: {{ user.birthdate }}</p>
-            <p>Address: {{ user.address }}</p>
-            <p>MyPay Balance:</p>
+        <h1 class="text-center text-3xl mb-4 font-extrabold text-black" style="font-family: Krona One;">My Profile</h1>
+        <div class="text-left" style="font-family: Krona One;">
+            <p style="font-family: Krona One; font-size: small;">Name: {{ user_info.Username }}</p>
+            <p style="font-family: Krona One; font-size: small;">Level: {{ customer_info.Level }}</p>
+            <p style="font-family: Krona One; font-size: small;">Sex: {{ user_info.Sex }}</p>
+            <p style="font-family: Krona One; font-size: small;">Phone Number: {{ user_info.PhoneNum }}</p>
+            <p style="font-family: Krona One; font-size: small;">Birth Date: {{ user_info.DoB }}</p>
+            <p style="font-family: Krona One; font-size: small;">Address: {{ user_info.Address }}</p>
+            <p style="font-family: Krona One; font-size: small;">MyPay Balance: {{ user_info.MyPayBalance }}</p>
         </div>
     </div>
 

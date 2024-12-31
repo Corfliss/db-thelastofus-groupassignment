@@ -1,5 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Krona+One&display=swap');
+
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Krona One', sans-serif;
     background-color: #f9f9f9;
     margin: 0;
     padding: 20px;

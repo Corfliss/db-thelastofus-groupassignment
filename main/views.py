@@ -28,9 +28,6 @@ def execute_sql_query(query, params=None):
             return results
         return None
 
-from django.db import connection
-from django.http import JsonResponse
-
 
 def execute_sql_query(query, params=None):
     """Helper function to execute raw SQL queries."""
@@ -49,6 +46,9 @@ def show_main(request):
     }
     return render(request, "home.html", context)
 
+
+# yellow features #
+# register #
 
 def register(request):
     context = {"title": "Registration Page"}
@@ -82,15 +82,6 @@ def register_customer(request):
                     messages.error(request, "Please use a different phone number, this phone number is registered already")
                     return render(request, 'register_customer.html')
 
-
-                # Insert new user into USER table
-                # query_string2 = (
-                #     """
-                #     SELECT phonenum
-                #     FROM "user"
-                #     WHERE phonenum = %d
-                #     """
-                # )
                 
                 query_string2="""
                 INSERT INTO "USER" (userid, username, password, sex, phonenum, dob, address) 
@@ -179,7 +170,7 @@ def register_worker(request):
 
     return render(request, 'register_worker.html')
 
-## LOGIN ##
+## login ##
 
 def login_user(request):
     if request.method == "POST":
@@ -193,7 +184,7 @@ def login_user(request):
 
         try:
             # Validate phone number and password
-            query = """SELECT "UserId", "Password" FROM "user" WHERE "PhoneNum" = %s;"""
+            query = """SELECT "UserId", "Username", "Password" FROM "user" WHERE "PhoneNum" = %s;"""
             user_data = execute_sql_query(query, [phonenum])
             print(user_data)
             if user_data:
@@ -207,11 +198,15 @@ def login_user(request):
                     user_type_result = execute_sql_query(query_user_type, [user_id])
                     user_type = "customer" if user_type_result else "worker"
                     
+                    # Username retrieval
+                    username = user_data[0]['Username']
+
                     # Set session
                     request.session["is_authenticated"] = True
                     print("pass 2")
                     request.session["user_id"] = user_id
                     request.session["user_type"] = user_type
+                    request.session["username"] = username
 
                     # Set cookie
                     response = HttpResponseRedirect(reverse("main:show_main")) 
@@ -228,59 +223,6 @@ def login_user(request):
             messages.error(request, f"An error occurred during login: {str(e)}")
         
     return render(request, "login.html")
-
-
-# def login_user(request):
-#     if request.method == "POST":
-#         phonenum = request.POST.get('phonenum')
-#         password = request.POST.get('password')
-
-#         # Ensure both fields are provided
-#         if not phonenum or not password:
-#             messages.error(request, "Phone number and password are required.")
-#             return render(request, "login.html")
-
-#         try:
-#             with connection.cursor() as cursor:
-#                 # Validate phone number and password
-#                 query="""   
-#                     SELECT userid, password FROM "User" WHERE phonenum = %s;
-#                     """
-#                 user_data = execute_sql_query(query)
-
-#                 if user_data and check_password(password, user_data[1]):
-#                     user_id = user_data[0]
-
-#                     # Determine the user type
-#                     cursor.execute(
-#                         """SET search_path TO public;
-#                         SELECT customerid FROM CUSTOMER WHERE customerid = %s;""",
-#                         [user_id]
-#                     )
-#                     is_customer = cursor.fetchone()
-
-#                     if is_customer:
-#                         user_type = 'customer'
-#                     else:
-#                         user_type = 'worker'
-
-#                     # Log in user and set cookies
-#                     request.session['is_authenticated'] = True
-#                     request.session['user_id'] = user_id
-#                     request.session['user_type'] = user_type
-#                     login(request, user_id)  # Simulated login
-#                     response = HttpResponseRedirect(reverse("main:show_main"))
-#                     response.set_cookie("last_login", str(datetime.datetime.now()))
-#                     return response
-#                 else:
-#                     # Invalid credentials
-#                     messages.error(request, "Invalid phone number and password.")
-
-#         except Exception as e:
-#             messages.error(request, f"An error occurred during login: {str(e)}")
-#             return render(request, "login.html")
-
-#     return render(request, "login.html")
 
 
 def logout_user(request):
@@ -367,7 +309,6 @@ def home(request):
     return render(request, "home.html", context)
 
 
-@login_required(login_url="/landingpage")
 def subcategory(request):
     # This might break the code, if anyone know better, glad to see the fix
     subcategory_name = request.GET.get('subcategory_id')
@@ -420,34 +361,75 @@ def subcategory(request):
     return render(request, "subcategory.html", context)
 
 
-@login_required(login_url="/landingpage")
 def customer_profile(request):
-    context = {"title": "My Profile"}
-    return render(request, "customer_profile.html", context)
 
+    try:
+        user_id = request.session.get("user_id")
 
-@login_required(login_url="/landingpage")
-def worker_profile(request):
-
-    worker = request.GET.get("worker")
-    worker_profile_query = """
-        SELECT u."Username", w."Rate", w."TotalFinishOrder", u."PhoneNum", u"DoB", u."Address"
-        FROM "user" u
-        JOIN worker w ON w."WorkerId" = u."UserId"
-        WHERE u."UserId" = %s
+        full_user_query = """
+            SELECT "UserId", "Username", "Sex", "PhoneNum", "DoB", "Address", "MyPayBalance"
+            FROM "user"
+            WHERE "UserId" = %s
         """
-    params = [worker]
-    worker_profile_data = execute_sql_query(worker_profile_query, params)
+        params = [user_id]
+        user_bio = execute_sql_query(full_user_query, params)
 
-    context = {"title": "My Profile", "worker_profile_data": worker_profile_data}
+        customer_query = """
+            SELECT "CustomerId", "Level"
+            FROM customer
+            WHERE "CustomerId" = %s
+        """
+        params = [user_id]
+        customer_bio = execute_sql_query(customer_query, params)
 
-    return render(request, "worker_profile.html", context)
+        context = {
+            "user": request.user,
+            "user_info": user_bio[0],
+            "customer_info": customer_bio[0],
+        }
 
+        return render(request, "customer_profile.html", context)
+
+    except Exception as e:
+        print(f"Error in worker_profile view: {e}")
+        return HttpResponse("An error occured.")
+
+def worker_profile(request):
+    try:
+        user_id = request.session.get("user_id")
+
+        full_user_query = """
+            SELECT "UserId", "Username", "Sex", "PhoneNum", "DoB", "Address", "MyPayBalance"
+            FROM "user"
+            WHERE "UserId" = %s
+        """
+        params = [user_id]
+        user_bio = execute_sql_query(full_user_query, params)
+
+        worker_query = """
+            SELECT "WorkerId", "BankName", "AccNumber", "NPWP", "PicURL", "Rate", "TotalFinishOrder"
+            FROM worker
+            WHERE "WorkerId" = %s
+        """
+        params = [user_id]
+        worker_bio = execute_sql_query(worker_query, params)
+
+        context = {
+            "user": request.user,
+            "user_info": user_bio[0],
+            "worker_info": worker_bio[0],
+        }
+
+        return render(request, "worker_profile.html", context)
+
+    except Exception as e:
+        print(f"Error in worker_profile view: {e}")
+        return HttpResponse("An error occured.")
 
 def mypay(request):
-    # user_id = 'USR00' # should be based on request
-    # Proposed solution:
-    user_id = request.user
+
+    user_id = request.session["user_id"]
+
     user_query = """
         SELECT "PhoneNum", "MyPayBalance", "Username", "UserId"
         FROM "user"
@@ -479,7 +461,6 @@ def mypay(request):
 
 
 # TODO: Refactor to match the models
-@login_required(login_url="/landingpage")
 def mypay_transaction(request):
 
     user_id = request.user.id  # TODO should be based on request
@@ -764,7 +745,6 @@ def mypay_transaction(request):
 
 
 # Testimony R
-@login_required(login_url="/landingpage")
 def view_testimony(request):
     user_id = request.user
     user_query = "SELECT * FROM testimony"
@@ -1002,8 +982,10 @@ def update_order_status(request, order_id):
 
 
 def service_booking(request):
-    user_id = request.user.id  # Get logged-in user ID
-    query = """
+
+    user_id = request.session.get("user_id") 
+
+    user_query = """
         SELECT 
             ssc."Name" AS SubcategoryName,
             ss."Session" AS SessionName,
@@ -1029,11 +1011,13 @@ def service_booking(request):
         WHERE 
             u."UserId" = %s;
     """
-    service_booking_list = execute_sql_query(query, user_id)
+    params = [user_id]
+    service_booking_list = execute_sql_query(user_query, params)
+
     context = {
-        "title": "Sijarta Service Booking",
         "service_booking_list": service_booking_list,
     }
+
     return render(request, "service_booking.html", context)
 
 
@@ -1088,16 +1072,8 @@ def landingpage(request):
 
 
 def update_customer_profile(request):
-    return render(request, "update_customer_profile.html")
-
-
-def update_worker_profile(request):
-    return render(request, "update_worker_profile.html")
-
-@csrf_exempt
-@login_required(login_url="/landingpage")
-def update_customer_profile(request):
-    userid = request.user.id
+    
+    userid = request.session["user_id"]
 
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -1153,8 +1129,6 @@ def update_customer_profile(request):
         form = CustomerRegistrationForm(instance=customer)
 
 
-@csrf_exempt
-@login_required(login_url="/landingpage")
 def update_worker_profile(request):
     userid = request.user.id
 

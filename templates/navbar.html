@@ -1,12 +1,18 @@
+{% load static %}
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Krona+One&display=swap');
+</style>
+
 <nav class="bg-[#55C7C8] shadow-lg fixed top-0 left-0 z-40 w-screen">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0">
     <div class="flex items-center justify-between h-16">
       <div class="flex items-center">
-        <h1 class="text-2xl font-bold text-white">SPARKLEAN</h1>
+        <h1 class="text-2xl font-bold text-white" style="font-family: Krona One;">SPARKLEAN</h1>
       </div>
 
       <!-- Navbar Section for Authenticated Users -->
-      <div class="hidden md:flex items-center space-x-8">
+      <div class="hidden md:flex items-center space-x-8" style="font-size: small; font-family: Krona One;">
         {% if request.session.user_id %}
           {% if request.session.user_type == "worker" %}
             <!-- Worker Navbar -->
@@ -14,7 +20,7 @@
               <span class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">{{ request.session.user_type }}</span>
             </a>
             <a>
-              <span class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">{{ username }}</span>
+              <span class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">{{ request.session.username }}</span>
             </a>
             <a href="{% url 'main:home' %}" class="text-center text-white font-bold py-2 px-4 rounded transition duration-300">
               Home

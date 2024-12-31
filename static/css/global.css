@@ -1,17 +1,24 @@
 @import url('https://fonts.googleapis.com/css2?family=Krona+One&display=swap');
 
-body{
-    font-family: 'Krona One', sans-serif;
-    background-color: #fafcff;
+body {
+    font-family: 'Krona One', sans-serif !important;
 }
 
 h1 {
-    font-family: 'Kumbh Sans'; 
+    font-family: 'Krona One', sans-serif !important;
 }   
 
 p {
-    font-family: 'Kumbh Sans';
+    font-family: 'Krona One', sans-serif !important;
+    font-size: medium !important;
 }
+
+.krona-one-regular {
+    font-family: "Krona One", serif;
+    font-weight: 400;
+    font-style: normal;
+}
+  
 
 .form-style form input, form textarea, form select {
     width: 100%;
