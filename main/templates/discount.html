@@ -6,6 +6,16 @@
 {% endblock meta %}
 
 {% block content %}
+{% if messages %}
+    <div class="container mb-4">
+        {% for message in messages %}
+            <div class="p-4 mb-4 text-white {{ message.tags }} rounded-md">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
 {% include 'navbar.html' %}
 {% block style %}
 <link rel="stylesheet" href="{% static 'css/discount.css' %}">
@@ -39,11 +49,21 @@
                     <td class="border border-gray-400 px-4 py-2">{{ voucher.UserQuota }}</td>
                     <td class="border border-gray-400 px-4 py-2">${{ voucher.Price }}</td>
                     <td class="border border-gray-400 px-4 py-2 text-center">
-                        <button 
-                            class="rounded-md bg-green-600 py-1 px-3 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-green-700 focus:shadow-none active:bg-green-700 hover:bg-green-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none" 
-                            type="button">
-                            Buy
-                        </button>
+                        <form method="POST" action="/purchase-voucher/">
+                            {% csrf_token %}
+                            <input type="hidden" name="voucher_code" value="{{ voucher.Code }}">
+                            <input type="hidden" name="voucher_price" value="{{ voucher.Price }}">
+                            <button 
+                                class="rounded-md bg-green-600 py-1 px-3 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-green-700 focus:shadow-none active:bg-green-700 hover:bg-green-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                                type="submit"
+                                {% if user_balance < voucher.Price %} disabled {% endif %}>
+                                {% if user_balance < voucher.Price %}
+                                    Insufficient Balance
+                                {% else %}
+                                    Purchase
+                                {% endif %}
+                            </button>
+                        </form>
                     </td>
                 </tr>
                 {% endfor %}

@@ -27,14 +27,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 # SECRET_KEY = 'django-insecure-unsi_jj4+$5(r7s-*q!-jcu53_2_0@wfajk0dx9%8-fwh@9qt6'
 
-SECRET_KEY = config("SECRET_KEY", "django-insecure-unsi_jj4+$5(r7s-*q!-jcu53_2_0@wfajk0dx9%8-fwh@9qt6")
+SECRET_KEY = config(
+    "SECRET_KEY", "django-insecure-unsi_jj4+$5(r7s-*q!-jcu53_2_0@wfajk0dx9%8-fwh@9qt6"
+)
 if not SECRET_KEY:
     raise ImproperlyConfigured("The SECRET_KEY environment variable is not set!")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # PRODUCTION = os.getenv("PRODUCTION", False)
 # DEBUG = not PRODUCTION
-DEBUG = config("DEBUG", default=False, cast=bool)
+DEBUG = True
 
 ALLOWED_HOSTS = [
     "localhost",
@@ -93,7 +95,9 @@ WSGI_APPLICATION = "db_thelastofus_groupassignment.wsgi.application"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    'default': dj_database_url.config(default="postgresql://postgres.fuhqmowfreadirspzmnk:basdatlastofus3@aws-0-us-east-1.pooler.supabase.com:6543/postgres")
+    "default": dj_database_url.config(
+        default="postgresql://postgres.fuhqmowfreadirspzmnk:basdatlastofus3@aws-0-us-east-1.pooler.supabase.com:6543/postgres"
+    )
 }
 
 

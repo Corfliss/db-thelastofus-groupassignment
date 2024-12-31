@@ -23,7 +23,8 @@ from main.views import (
     update_customer_profile,
     update_worker_profile,
     worker_profile_summary,
-    update_order_status
+    update_order_status,
+    purchase_voucher,
 )
 
 app_name = "main"
@@ -37,20 +38,30 @@ urlpatterns = [
     path("subcategory/", subcategory, name="subcategory"),
     path("customer-profile/", customer_profile, name="customer-profile"),
     path("worker-profile/", worker_profile, name="worker-profile"),
-    path("worker-profile-summary/", worker_profile_summary, name="worker-profile-summary"),
-    path("update-customer-profile/", update_customer_profile, name="update-customer-profile"),
+    path(
+        "worker-profile-summary/", worker_profile_summary, name="worker-profile-summary"
+    ),
+    path(
+        "update-customer-profile/",
+        update_customer_profile,
+        name="update-customer-profile",
+    ),
     path("update-worker-profile/", update_worker_profile, name="update-worker-profile"),
     path("mypay/", mypay, name="mypay"),
     path("mypay-transaction/", mypay_transaction, name="mypay-transaction"),
     path("service-job/", service_job, name="service-job"),
     path("service-job-status/", service_job_status, name="service-job-status"),
-    path('service-job-status/update-status/<str:order_id>/', update_order_status, name='update_order_status'),
+    path(
+        "service-job-status/update-status/<str:order_id>/",
+        update_order_status,
+        name="update_order_status",
+    ),
     path("service_booking/", service_booking, name="service_booking"),
     path("create_testimonial/", create_testimonial, name="create_testimonial"),
     path("discount/", discount, name="discount"),
+    path("purchase-voucher/", views.purchase_voucher, name="purchase_voucher"),
     path("myorder/", myorder, name="my-orcer"),
-    path('landingpage/', landingpage, name='landingpage'),
-    path('register_worker/', register_worker, name='register_worker'),
-    path('register_customer/', register_customer, name='register_customer'),
-    
+    path("landingpage/", landingpage, name="landingpage"),
+    path("register_worker/", register_worker, name="register_worker"),
+    path("register_customer/", register_customer, name="register_customer"),
 ]
