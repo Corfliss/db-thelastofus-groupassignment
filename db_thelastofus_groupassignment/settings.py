@@ -45,11 +45,12 @@ ALLOWED_HOSTS = [
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://naim-baziz-dbthelastofus.pbp.cs.ui.ac.id",
+    "https://naim.baziz-dbthelastofus.pbp.cs.ui.ac.id",
     "http://naim-baziz-dbthelastofus.pbp.cs.ui.ac.id",
     "http://naim-baziz-dbproject.pbp.cs.ui.ac.id",
     "https://naim-baziz-dbproject.pbp.cs.ui.ac.id",
 ]
+
 
 # Application definition
 
@@ -104,6 +105,7 @@ DATABASES = {
     'default': dj_database_url.config(default="postgresql://postgres.fuhqmowfreadirspzmnk:basdatlastofus3@aws-0-us-east-1.pooler.supabase.com:6543/postgres")
 }
 
+# Comments
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
