@@ -477,6 +477,7 @@ def mypay_transaction(request):
         WHERE "CustomerId" = %s
     """
     customer_result = execute_sql_query(customer_query, [user_id])
+    print("customer result: ", customer_result)
     if len(customer_result) > 0:
         account = "customer"
 
@@ -488,6 +489,7 @@ def mypay_transaction(request):
             WHERE "WorkerId" = %s
         """
         worker_result = execute_sql_query(worker_query, [user_id])
+        print("worker result: ", worker_result)
         if len(worker_result) > 0:
             account = "worker"
 
