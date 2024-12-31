@@ -47,7 +47,10 @@ ALLOWED_HOSTS = [
     "naim-baziz-dbproject.pbp.cs.ui.ac.id",
 ]
 
-CSRF_TRUSTED_ORIGINS = ["https://naim-baziz-dbthelastofus.pbp.cs.ui.ac.id/"]
+CSRF_TRUSTED_ORIGINS = [
+    "https://naim-baziz-dbthelastofus.pbp.cs.ui.ac.id/",
+    "http://naim-baziz-dbthelastofus.pbp.cs.ui.ac.id/",
+]
 
 # Application definition
 
