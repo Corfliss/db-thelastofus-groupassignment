@@ -43,6 +43,7 @@ ALLOWED_HOSTS = [
     "127.0.0.1",
     "db-thelastofus-groupassignment.onrender.com",
     "naim.baziz-dbthelastofus.pbp.cs.ui.ac.id",
+    "naim-baziz-dbthelastofus.pbp.cs.ui.ac.id",
 ]
 
 
