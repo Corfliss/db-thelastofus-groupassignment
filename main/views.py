@@ -50,6 +50,8 @@ def show_main(request):
     }
     return render(request, "home.html", context)
 
+def landingpage(request):
+    return render(request, "landingpage.html")
 
 # yellow features #
 # register #
@@ -66,44 +68,33 @@ def register_customer(request):
         username = request.POST['username']
         sex = request.POST['sex']
         phonenum = request.POST['phonenum']
-        password = make_password(request.POST['password'])
+        password = request.POST['password']
         dob = request.POST['dob']
         address = request.POST['address']
-        new_userid = str(uuid.uuid4())
+        n_userid = uuid.uuid4().hex
+        new_userid = str(n_userid)
 
         try:
             with connection.cursor() as cursor:
 
-                # Validate unique phone number
-                query_string1 = """
-                    SELECT COUNT(*)
-                    FROM "user"
-                    WHERE user.PhoneNum = %d
-                """
-                execute_sql_query(query_string1, [phonenum])
-
-                if cursor.fetchone()[0] > 0:
-                    messages.error(request, "Please use a different phone number, this phone number is registered already")
-                    return render(request, 'register_customer.html')
-
-                
-                query_string2="""
-                INSERT INTO "USER" (userid, username, password, sex, phonenum, dob, address) 
-                VALUES (%s, %s, %s, %s, %d, %s, %s);
+                user_insert="""
+                INSERT INTO "user" ("UserId", "Username", "Password", "Sex", "PhoneNum", "DoB", "Address") 
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
                 """
                 params_2 = [new_userid, username, password, sex, phonenum, dob, address]
 
-                execute_sql_query(query_string2, params_2)
+                execute_sql_query(user_insert, params_2)
 
-                query_string3=  """
-                INSERT INTO CUSTOMER (customerid, level) VALUES (%s, %d);
+                customer_insert=  """
+                INSERT INTO "customer" ("CustomerId", "Level")
+                VALUES (%s, %s)
                 """
                 params_3 = [new_userid, 0]
                 
-                execute_sql_query(query_string3, params_3)
+                execute_sql_query(customer_insert, params_3)
 
             messages.success(request, "Customer registration successful!")
-            return redirect('login_user')
+            return redirect("main:login")
 
         except Exception as e:
             messages.error(request, f"Error during registration: {str(e)}")
@@ -113,61 +104,42 @@ def register_customer(request):
 
 def register_worker(request):
     if request.method == 'POST':
-        
-        # Fetch latest user ID from the database
-        with connection.cursor() as cursor:
-            cursor.execute("""SET search_path TO public; SELECT userid FROM "USER" ORDER BY userid DESC LIMIT 1;""")
-            latest_user = cursor.fetchone()
-            if latest_user:
-                new_userid = f"USR{int(latest_user[0][3:]) + 1:02d}"
-            else:
-                new_userid = "USR01"  # Default for first user
 
         # Get data from POST request
         username = request.POST['username']
         sex = request.POST['sex']
         phonenum = request.POST['phonenum']
-        password = make_password(request.POST['password'])
+        password = request.POST['password']
         dob = request.POST['dob']
         address = request.POST['address']
-
-        # Specific workers attributes
         bankname = request.POST['bankname']
         accnumber = request.POST['accnumber']
         npwp = request.POST['npwp']
         picurl = request.POST['picurl']
-        new_userid = str(uuid.uuid4())
+        n_userid = uuid.uuid4().hex
+        new_userid = str(n_userid)
 
         try:
             with connection.cursor() as cursor:
-                # Validate unique phone number
-                cursor.execute("""SET search_path TO public; SELECT COUNT(*) FROM "USER" WHERE phonenum = %s;""", [phonenum])
-                if cursor.fetchone()[0] > 0:
-                    messages.error(request, "Please use a different phone number, this phone number is registered already")
-                    return render(request, 'register_worker.html')
 
-                # Validate unique bank name and account number combination
-                cursor.execute("""SET search_path TO public; SELECT COUNT(*) FROM WORKER WHERE bankname = %s AND accnumber = %s;""",
-                               [bankname, accnumber])
-                if cursor.fetchone()[0] > 0:
-                    messages.error(request, "Please use a different bank name or account number")
-                    return render(request, 'register_worker.html')
+                user_insert="""
+                INSERT INTO "user" ("UserId", "Username", "Password", "Sex", "PhoneNum", "DoB", "Address") 
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                """
+                params_2 = [new_userid, username, password, sex, phonenum, dob, address]
 
-                # Insert the new user into the USER table
-                cursor.execute("""
-                SET search_path TO public;
-                INSERT INTO "USER" (userid, username, password, sex, phonenum, dob, address) 
-                VALUES (%s, %s, %s, %s, %s, %s, %s);
-                """, [new_userid, username, password, sex, phonenum, dob, address])
+                execute_sql_query(user_insert, params_2)
 
-                # Insert into the WORKER table
-                cursor.execute("""
-                INSERT INTO WORKER (workerid, bankname, accnumber, npwp, picurl) 
-                VALUES (%s, %s, %s, %s, %s);
-                """, [new_userid, bankname, accnumber, npwp, picurl])
+                worker_insert=  """
+                INSERT INTO "worker" ("WorkerId", "BankName", "AccNumber", "NPWP", "PicURL", "Rate", "TotalFinishOrder")
+                VALUES (%s, %s, %s, %s, %s,  %s, %s)
+                """
+                params_3 = [new_userid, bankname, accnumber, npwp, picurl, 0, 0]
+                
+                execute_sql_query(worker_insert, params_3)
 
             messages.success(request, "Worker registration successful!")
-            return redirect('login_user')
+            return redirect("main:login")
 
         except Exception as e:
             messages.error(request, f"Error during registration: {str(e)}")
@@ -187,7 +159,7 @@ def login_user(request):
             return render(request, 'login.html')
 
         try:
-            # Validate phone number and password
+
             query = """SELECT "UserId", "Username", "Password" FROM "user" WHERE "PhoneNum" = %s;"""
             user_data = execute_sql_query(query, [phonenum])
             print(user_data)
@@ -228,12 +200,162 @@ def login_user(request):
         
     return render(request, "login.html")
 
-
+## logout ##
 def logout_user(request):
     request.session.flush()
     return redirect("main:landingpage")
 
 
+## profile ##
+def customer_profile(request):
+    try:
+        user_id = request.session.get("user_id")
+
+        full_user_query = """
+            SELECT "UserId", "Username", "Sex", "PhoneNum", "DoB", "Address", "MyPayBalance"
+            FROM "user"
+            WHERE "UserId" = %s
+        """
+        params = [user_id]
+        user_bio = execute_sql_query(full_user_query, params)
+
+        customer_query = """
+            SELECT "CustomerId", "Level"
+            FROM customer
+            WHERE "CustomerId" = %s
+        """
+        params = [user_id]
+        customer_bio = execute_sql_query(customer_query, params)
+
+        context = {
+            "user": request.user,
+            "user_info": user_bio[0],
+            "customer_info": customer_bio[0],
+        }
+
+        return render(request, "customer_profile.html", context)
+
+    except Exception as e:
+        print(f"Error in worker_profile view: {e}")
+        return HttpResponse("An error occured.")
+
+def worker_profile(request):
+    try:
+        user_id = request.session["user_id"]
+
+        full_user_query = """
+            SELECT "UserId", "Username", "Sex", "PhoneNum", "DoB", "Address", "MyPayBalance"
+            FROM "user"
+            WHERE "UserId" = %s
+        """
+        params = [user_id]
+        user_bio = execute_sql_query(full_user_query, params)
+
+        worker_query = """
+            SELECT "WorkerId", "BankName", "AccNumber", "NPWP", "PicURL", "Rate", "TotalFinishOrder"
+            FROM worker
+            WHERE "WorkerId" = %s
+        """
+        params = [user_id]
+        worker_bio = execute_sql_query(worker_query, params)
+
+        context = {
+            "user": request.user,
+            "user_info": user_bio[0],
+            "worker_info": worker_bio[0],
+        }
+
+        return render(request, "worker_profile.html", context)
+
+    except Exception as e:
+        print(f"Error in worker_profile view: {e}")
+        return HttpResponse("An error occured.")
+
+## update profile ##
+def update_customer_profile(request):
+    if request.method == 'POST':
+
+        # Get data from POST request
+        username = request.POST['username']
+        sex = request.POST['sex']
+        phonenum = request.POST['phonenum']
+        password = request.POST['password']
+        dob = request.POST['dob']
+        address = request.POST['address']
+        new_userid = request.session.get("user_id")
+
+        try:
+            with connection.cursor() as cursor:
+                # Update user data
+                user_update = """
+                UPDATE "user"
+                SET "Username" = %s, "Password" = %s, "Sex" = %s, "PhoneNum" = %s, "DoB" = %s, "Address" = %s
+                WHERE "UserId" = %s
+                """
+                params_user = [username, password, sex, phonenum, dob, address, new_userid]
+                cursor.execute(user_update, params_user)
+
+            messages.success(request, "Customer profile updated successfully!")
+            return redirect("main:customer-profile")
+
+        except Exception as e:
+            error_message = f"Error during profile update: {str(e)}"
+            print(error_message) 
+            messages.error(request, error_message)
+            return redirect("main:update-customer-profile") 
+
+    return render(request, 'update_customer_profile.html')
+
+def update_worker_profile(request):
+    if request.method == 'POST':
+
+        # Get data from POST request
+        username = request.POST['username']
+        sex = request.POST['sex']
+        phonenum = request.POST['phonenum']
+        password = request.POST['password']
+        dob = request.POST['dob']
+        address = request.POST['address']
+        bankname = request.POST['bankname']
+        accnumber = request.POST['accnumber']
+        npwp = request.POST['npwp']
+        picurl = request.POST['picurl']
+        new_userid = request.session.get("user_id")
+
+        try:
+            with connection.cursor() as cursor:
+                # Update user data
+                user_update = """
+                UPDATE "user"
+                SET "Username" = %s, "Password" = %s, "Sex" = %s, "PhoneNum" = %s, "DoB" = %s, "Address" = %s
+                WHERE "UserId" = %s
+                """
+                params_user = [username, password, sex, phonenum, dob, address, new_userid]
+                cursor.execute(user_update, params_user)
+
+                # Update worker data
+                worker_update = """
+                UPDATE "worker"
+                SET "BankName" = %s, "AccNumber" = %s, "NPWP" = %s, "PicURL" = %s
+                WHERE "WorkerId" = %s
+                """
+                params_worker = [bankname, accnumber, npwp, picurl, new_userid]
+                cursor.execute(worker_update, params_worker)
+
+            messages.success(request, "Worker profile updated successfully!")
+            return redirect("main:worker-profile")
+
+        except Exception as e:
+            error_message = f"Error during profile update: {str(e)}"
+            print(error_message) 
+            messages.error(request, error_message)
+            return redirect("main:update-worker-profile") 
+
+    return render(request, 'update_worker_profile.html')
+
+
+## green features ##
+# homepage #
 def home(request):
     user = request.user
      
@@ -312,7 +434,50 @@ def home(request):
     # print(category_subcategory_result)
     return render(request, "home.html", context)
 
+def worker_profile_summary(request):
+    return render(request, "worker_profile_summary.html")
 
+# service booking #
+def service_booking(request):
+
+    user_id = request.session.get("user_id") 
+
+    user_query = """
+        SELECT 
+            ssc."Name" AS SubcategoryName,
+            ss."Session" AS SessionName,
+            ss."Price" AS SessionPrice,
+            wu."Username" AS WorkerName,
+            os."Status" AS OrderStatus
+        FROM 
+            "user" u
+        JOIN 
+            "customer" c ON c."CustomerId" = u."UserId"
+        JOIN 
+            "orders" o ON o."CustomerId" = c."CustomerId"
+        JOIN 
+            "order_status" os ON os."OrderId" = o."OrderId"
+        JOIN 
+            "service_session" ss ON ss."SessionId" = o."SessionId"
+        JOIN 
+            "service_subcategory" ssc ON ssc."SSCId" = ss."SSCId"
+        JOIN 
+            "worker" w ON w."WorkerId" = ss."WorkerId"
+        JOIN 
+            "user" wu ON wu."UserId" = w."WorkerId"
+        WHERE 
+            u."UserId" = %s;
+    """
+    params = [user_id]
+    service_booking_list = execute_sql_query(user_query, params)
+
+    context = {
+        "service_booking_list": service_booking_list,
+    }
+
+    return render(request, "service_booking.html", context)
+
+# subcategory #
 def subcategory(request):
     # This might break the code, if anyone know better, glad to see the fix
     subcategory_name = request.GET.get('subcategory_id')
@@ -364,72 +529,78 @@ def subcategory(request):
     }
     return render(request, "subcategory.html", context)
 
+def myorder(request):
+    return render(request, "myorder.html")
 
-def customer_profile(request):
+# update order status #
+def update_order_status(request, order_id):
+    next_status_mapping = {
+        'STI04': 'STI06',
+        'STI06': 'STI05',
+        'STI05': 'STI00'
+    }
 
-    try:
-        user_id = request.session.get("user_id")
+    # Fetch current status
+    current_status_query = """
+        SELECT os."Status", os."StatusId"
+        FROM TR_ORDER_STATUS tos
+        JOIN ORDER_STATUS os ON tos."StatusId" = os."StatusId"
+        WHERE tos."ServiceTrId" = %s
+        ORDER BY tos."date" DESC
+    """
+    current_status = execute_sql_query(current_status_query, [order_id])
+    current_status = current_status[0]['StatusId']
 
-        full_user_query = """
-            SELECT "UserId", "Username", "Sex", "PhoneNum", "DoB", "Address", "MyPayBalance"
-            FROM "user"
-            WHERE "UserId" = %s
-        """
-        params = [user_id]
-        user_bio = execute_sql_query(full_user_query, params)
+    # Determine the next status
+    next_status = next_status_mapping.get(current_status)
+    if not next_status:
+        print("No next status")
+        return redirect('main:service-job-status')  # No valid next status
 
-        customer_query = """
-            SELECT "CustomerId", "Level"
-            FROM customer
-            WHERE "CustomerId" = %s
-        """
-        params = [user_id]
-        customer_bio = execute_sql_query(customer_query, params)
+    # Update the order status
+    update_status_query = """
+                    UPDATE tr_order_status 
+                    SET "StatusId" = %s
+                    WHERE "ServiceTrId" = %s
+                    """
+    params = [next_status, order_id]
+    execute_sql_query(update_status_query, params)
+    print("Updated the order status")
+    return redirect('main:service-job-status')
 
-        context = {
-            "user": request.user,
-            "user_info": user_bio[0],
-            "customer_info": customer_bio[0],
-        }
+## blue features ##
+# Testimony R
+def view_testimony(request):
+    user_id = request.user
+    user_query = "SELECT * FROM testimony"
+    query_result = execute_sql_query(user_query)
+    context = {"user": user_id, "testimonies": query_result}
+    return render(request, "subcategory.html", context)
 
-        return render(request, "customer_profile.html", context)
+def create_testimonial(request):
+    return render(request, "create_testimonial.html")
 
-    except Exception as e:
-        print(f"Error in worker_profile view: {e}")
-        return HttpResponse("An error occured.")
+# discount #
+def discount(request):
+    voucher_query = """
+    SELECT v."Code","MinTrOrder", "NmbDayValid", "UserQuota", "Price", "Discount" 
+    FROM voucher v 
+    JOIN discount d
+    ON v."Code" = d."Code"
+"""
+    promo_query = """
+    SELECT "Code", "OfferEndDate" FROM promo
+"""
+    voucher_results = execute_sql_query(voucher_query)
+    promo_results = execute_sql_query(promo_query)
+    context = {
+        "user": request.user,
+        "vouchers": voucher_results,
+        "promo": promo_results,
+    }
+    return render(request, "discount.html", context)
 
-def worker_profile(request):
-    try:
-        user_id = request.session.get("user_id")
-
-        full_user_query = """
-            SELECT "UserId", "Username", "Sex", "PhoneNum", "DoB", "Address", "MyPayBalance"
-            FROM "user"
-            WHERE "UserId" = %s
-        """
-        params = [user_id]
-        user_bio = execute_sql_query(full_user_query, params)
-
-        worker_query = """
-            SELECT "WorkerId", "BankName", "AccNumber", "NPWP", "PicURL", "Rate", "TotalFinishOrder"
-            FROM worker
-            WHERE "WorkerId" = %s
-        """
-        params = [user_id]
-        worker_bio = execute_sql_query(worker_query, params)
-
-        context = {
-            "user": request.user,
-            "user_info": user_bio[0],
-            "worker_info": worker_bio[0],
-        }
-
-        return render(request, "worker_profile.html", context)
-
-    except Exception as e:
-        print(f"Error in worker_profile view: {e}")
-        return HttpResponse("An error occured.")
-
+## red features ##
 def mypay(request):
 
     user_id = request.session["user_id"]
@@ -463,8 +634,7 @@ def mypay(request):
 
     return render(request, "mypay.html", context)
 
-
-# TODO: Refactor to match the models
+# mypay transaction #
 def mypay_transaction(request):
 
     user_id = request.session["user_id"]
@@ -739,15 +909,7 @@ def mypay_transaction(request):
 
     return render(request, "mypaytransaction.html", context)
 
-
-# Testimony R
-def view_testimony(request):
-    user_id = request.user
-    user_query = "SELECT * FROM testimony"
-    query_result = execute_sql_query(user_query)
-    context = {"user": user_id, "testimonies": query_result}
-    return render(request, "subcategory.html", context)
-
+# service job
 def service_job(request):
     user_id = request.session["user_id"]
     # fetch which categories worker is registered for
@@ -865,6 +1027,7 @@ def service_job(request):
     }
     return render(request, "servicejob.html", context)
 
+# service job status 
 def service_job_status(request):
     # Update the order status where needed
     '''
@@ -939,267 +1102,3 @@ def service_job_status(request):
     }
 
     return render(request, 'servicejobstatus.html', context)
-
-def update_order_status(request, order_id):
-    next_status_mapping = {
-        'STI04': 'STI06',
-        'STI06': 'STI05',
-        'STI05': 'STI00'
-    }
-
-    # Fetch current status
-    current_status_query = """
-        SELECT os."Status", os."StatusId"
-        FROM TR_ORDER_STATUS tos
-        JOIN ORDER_STATUS os ON tos."StatusId" = os."StatusId"
-        WHERE tos."ServiceTrId" = %s
-        ORDER BY tos."date" DESC
-    """
-    current_status = execute_sql_query(current_status_query, [order_id])
-    current_status = current_status[0]['StatusId']
-
-    # Determine the next status
-    next_status = next_status_mapping.get(current_status)
-    if not next_status:
-        print("No next status")
-        return redirect('main:service-job-status')  # No valid next status
-
-    # Update the order status
-    update_status_query = """
-                    UPDATE tr_order_status 
-                    SET "StatusId" = %s
-                    WHERE "ServiceTrId" = %s
-                    """
-    params = [next_status, order_id]
-    execute_sql_query(update_status_query, params)
-    print("Updated the order status")
-    return redirect('main:service-job-status')
-
-
-
-def service_booking(request):
-
-    user_id = request.session.get("user_id") 
-
-    user_query = """
-        SELECT 
-            ssc."Name" AS SubcategoryName,
-            ss."Session" AS SessionName,
-            ss."Price" AS SessionPrice,
-            wu."Username" AS WorkerName,
-            os."Status" AS OrderStatus
-        FROM 
-            "user" u
-        JOIN 
-            "customer" c ON c."CustomerId" = u."UserId"
-        JOIN 
-            "orders" o ON o."CustomerId" = c."CustomerId"
-        JOIN 
-            "order_status" os ON os."OrderId" = o."OrderId"
-        JOIN 
-            "service_session" ss ON ss."SessionId" = o."SessionId"
-        JOIN 
-            "service_subcategory" ssc ON ssc."SSCId" = ss."SSCId"
-        JOIN 
-            "worker" w ON w."WorkerId" = ss."WorkerId"
-        JOIN 
-            "user" wu ON wu."UserId" = w."WorkerId"
-        WHERE 
-            u."UserId" = %s;
-    """
-    params = [user_id]
-    service_booking_list = execute_sql_query(user_query, params)
-
-    context = {
-        "service_booking_list": service_booking_list,
-    }
-
-    return render(request, "service_booking.html", context)
-
-
-def create_testimonial(request):
-    return render(request, "create_testimonial.html")
-
-
-def discount(request):
-    voucher_query = """
-    SELECT v."Code","MinTrOrder", "NmbDayValid", "UserQuota", "Price", "Discount" 
-    FROM voucher v 
-    JOIN discount d
-    ON v."Code" = d."Code"
-"""
-    promo_query = """
-    SELECT "Code", "OfferEndDate" FROM promo
-"""
-    voucher_results = execute_sql_query(voucher_query)
-    promo_results = execute_sql_query(promo_query)
-    context = {
-        "user": request.user,
-        "vouchers": voucher_results,
-        "promo": promo_results,
-    }
-    return render(request, "discount.html", context)
-
-
-def myorder(request):
-    return render(request, "myorder.html")
-
-# @csrf_exempt
-# def update_service_status(request, service_id):
-#     if request.method == "POST":
-#         data = json.loads(request.body)
-#         new_status = data.get("status")
-
-#         try:
-#             # Update the service object in the database
-#             service = Service.objects.get(id=service_id)
-#             service.status = new_status
-#             service.save()
-#             return JsonResponse({"success": True})
-#         except Service.DoesNotExist:
-#             return JsonResponse(
-#                 {"success": False, "error": "Service not found"}, status=404
-#             )
-#     return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
-
-
-def landingpage(request):
-    return render(request, "landingpage.html")
-
-
-def update_customer_profile(request):
-    
-    userid = request.session["user_id"]
-
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        sex = request.POST.get('sex')
-        phonenum = request.POST.get('phonenum')
-        dob = request.POST.get('dob')
-        address = request.POST.get('address')
-
-        with connection.cursor() as cursor:
-            # Update the customer details
-            cursor.execute("""
-            UPDATE "USER" 
-            SET username = %s, sex = %s, phonenum = %s, dob = %s, address = %s
-            WHERE userid = %s;
-            """, [username, sex, phonenum, dob, address, userid])
-
-            # Update password if provided
-            if password:
-                cursor.execute("""
-                UPDATE "USER" 
-                SET password = %s 
-                WHERE userid = %s;
-                """, [make_password(password), userid])
-
-        messages.success(request, "Your profile has been updated successfully.")
-        return redirect(reverse('main:customer-profile'))
-
-    with connection.cursor() as cursor:
-        cursor.execute("""
-        SELECT id, username, sex, phonenum, dob, address
-        FROM "USER"
-        WHERE userid = %s;
-        """, [userid])
-        user = cursor.fetchone()
-
-    context = {
-        'user': {
-            'userid': user[0],
-            'username': user[1],
-            'sex': user[2],
-            'phonenum': user[3],
-            'dob': user[4],
-            'address': user[5]
-        }
-    }
-    return render(request, 'update_customer_profile.html', context)
-    if form.is_valid() and request.method == "POST":
-        form.save()
-        messages.success(request, "Your profile has been updated successfully.")
-        return HttpResponseRedirect(reverse("main:customer-profile"))
-    else:
-        form = CustomerRegistrationForm(instance=customer)
-
-
-def update_worker_profile(request):
-    userid = request.user.id
-
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        sex = request.POST.get('sex')
-        phonenum = request.POST.get('phonenum')
-        dob = request.POST.get('dob')
-        address = request.POST.get('address')
-        bankname = request.POST.get('bankname')
-        accnumber = request.POST.get('accnumber')
-        npwp = request.POST.get('npwp')
-        picurl = request.POST.get('picurl')
-
-        with connection.cursor() as cursor:
-            # Update the worker's user details
-            cursor.execute("""
-            UPDATE "USER" 
-            SET username = %s, sex = %s, phonenum = %s, dob = %s, address = %s
-            WHERE userid = %s;
-            """, [username, sex, phonenum, dob, address, userid])
-
-            # Update password if provided
-            if password:
-                cursor.execute("""
-                UPDATE "USER" 
-                SET password = %s 
-                WHERE userid = %s;
-                """, [make_password(password), userid])
-
-            # Update additional worker details
-            cursor.execute("""
-            UPDATE WORKER 
-            SET bankname = %s, accnumber = %s, npwp = %s, picurl = %s
-            WHERE id = %s;
-            """, [bankname, accnumber, npwp, picurl, userid])
-
-        messages.success(request, "Your profile has been updated successfully.")
-        return redirect(reverse('main:worker-profile'))
-
-    with connection.cursor() as cursor:
-        cursor.execute("""
-        SELECT id, uname, sex, phonenum, dob, uaddress
-        FROM "USER"
-        WHERE id = %s;
-        """, [userid])
-        user = cursor.fetchone()
-
-        cursor.execute("""
-        SELECT bankname, accnumber, npwp, picurl
-        FROM WORKER
-        WHERE id = %s;
-        """, [userid])
-        worker = cursor.fetchone()
-
-    context = {
-        'user': {
-            'id': user[0],
-            'username': user[1],
-            'sex': user[2],
-            'phonenum': user[3],
-            'dob': user[4],
-            'address': user[5]
-        },
-        'worker': {
-            'bank_name': worker[0],
-            'acc_number': worker[1],
-            'npwp': worker[2],
-            'pic_url': worker[3]
-        }
-    }
-    return render(request, 'update_worker_profile.html', context)
-
-
-
-def worker_profile_summary(request):
-    return render(request, "worker_profile_summary.html")
