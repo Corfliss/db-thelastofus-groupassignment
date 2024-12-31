@@ -27,22 +27,19 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 # SECRET_KEY = 'django-insecure-unsi_jj4+$5(r7s-*q!-jcu53_2_0@wfajk0dx9%8-fwh@9qt6'
 
-SECRET_KEY = config(
-    "SECRET_KEY", "django-insecure-unsi_jj4+$5(r7s-*q!-jcu53_2_0@wfajk0dx9%8-fwh@9qt6"
-)
+SECRET_KEY = config("SECRET_KEY", "django-insecure-unsi_jj4+$5(r7s-*q!-jcu53_2_0@wfajk0dx9%8-fwh@9qt6")
 if not SECRET_KEY:
     raise ImproperlyConfigured("The SECRET_KEY environment variable is not set!")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # PRODUCTION = os.getenv("PRODUCTION", False)
 # DEBUG = not PRODUCTION
-DEBUG = True
+DEBUG = config("DEBUG", default=False, cast=bool)
 
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
-    "db-thelastofus-groupassignment.onrender.com",
-    "naim.baziz-dbthelastofus.pbp.cs.ui.ac.id",
+    "db-thelastofus-groupassignment.onrender.com"
 ]
 
 
@@ -62,13 +59,13 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
 ROOT_URLCONF = "db_thelastofus_groupassignment.urls"
@@ -96,9 +93,7 @@ WSGI_APPLICATION = "db_thelastofus_groupassignment.wsgi.application"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    "default": dj_database_url.config(
-        default="postgresql://postgres.fuhqmowfreadirspzmnk:basdatlastofus3@aws-0-us-east-1.pooler.supabase.com:6543/postgres"
-    )
+    'default': dj_database_url.config(default="postgresql://postgres.fuhqmowfreadirspzmnk:basdatlastofus3@aws-0-us-east-1.pooler.supabase.com:6543/postgres")
 }
 
 
