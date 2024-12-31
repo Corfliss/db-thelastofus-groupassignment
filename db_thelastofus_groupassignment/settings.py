@@ -44,6 +44,7 @@ ALLOWED_HOSTS = [
     "db-thelastofus-groupassignment.onrender.com",
     "naim.baziz-dbthelastofus.pbp.cs.ui.ac.id",
     "naim-baziz-dbthelastofus.pbp.cs.ui.ac.id",
+    "naim-baziz-dbproject.pbp.cs.ui.ac.id",
 ]
 
 
