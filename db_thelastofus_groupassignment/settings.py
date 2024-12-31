@@ -39,9 +39,16 @@ DEBUG = config("DEBUG", default=False, cast=bool)
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
-    "db-thelastofus-groupassignment.onrender.com"
+    "db-thelastofus-groupassignment.onrender.com",
+    "naim.baziz-dbthelastofus.pbp.cs.ui.ac.id",
+    "naim-baziz-dbthelastofus.pbp.cs.ui.ac.id",
+    "naim-baziz-dbproject.pbp.cs.ui.ac.id",
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://naim-baziz-dbthelastofus.pbp.cs.ui.ac.id/",
+    "http://naim-baziz-dbthelastofus.pbp.cs.ui.ac.id/",
+]
 
 # Application definition
 
