@@ -42,6 +42,12 @@ def execute_sql_query(query, params=None):
 
 
 def show_main(request):
+
+    # Blocks users that are not logged in from accessing
+    user_id = request.session.get('user_id')
+    if not user_id:
+        return redirect('main:landingpage')
+    
     try:
         last_login = request.COOKIES["last_login"]
     except:
@@ -218,6 +224,13 @@ def logout_user(request):
 
 ## profile ##
 def customer_profile(request):
+
+    # Blocks users that are not logged in from accessing
+    user_id = request.session.get('user_id')
+    if not user_id:
+        return redirect('main:landingpage')
+    
+
     try:
         user_id = request.session.get("user_id")
 
@@ -251,6 +264,12 @@ def customer_profile(request):
 
 
 def worker_profile(request):
+
+    # Blocks users that are not logged in from accessing
+    user_id = request.session.get('user_id')
+    if not user_id:
+        return redirect('main:landingpage')
+
     try:
         user_id = request.session["user_id"]
 
@@ -285,6 +304,12 @@ def worker_profile(request):
 
 ## update profile ##
 def update_customer_profile(request):
+
+    # Blocks users that are not logged in from accessing
+    user_id = request.session.get('user_id')
+    if not user_id:
+        return redirect('main:landingpage')
+
     if request.method == "POST":
 
         # Get data from POST request
@@ -328,6 +353,12 @@ def update_customer_profile(request):
 
 
 def update_worker_profile(request):
+
+    # Blocks users that are not logged in from accessing
+    user_id = request.session.get('user_id')
+    if not user_id:
+        return redirect('main:landingpage')
+
     if request.method == "POST":
 
         # Get data from POST request
@@ -386,6 +417,12 @@ def update_worker_profile(request):
 ## green features ##
 # homepage #
 def home(request):
+
+    # Blocks users that are not logged in from accessing
+    user_id = request.session.get('user_id')
+    if not user_id:
+        return redirect('main:landingpage')
+    
     user = request.user
 
     category_subcategory = """
@@ -417,6 +454,13 @@ def home(request):
 
 
 def home(request):
+
+    # Blocks users that are not logged in from accessing
+    user_id = request.session.get('user_id')
+    if not user_id:
+        return redirect('main:landingpage')
+    
+
     user = request.user
 
     category_subcategory = """
@@ -468,11 +512,23 @@ def home(request):
 
 
 def worker_profile_summary(request):
+
+    # Blocks users that are not logged in from accessing
+    user_id = request.session.get('user_id')
+    if not user_id:
+        return redirect('main:landingpage')
+    
     return render(request, "worker_profile_summary.html")
 
 
 # service booking #
 def service_booking(request):
+
+    # Blocks users that are not logged in from accessing
+    user_id = request.session.get('user_id')
+    if not user_id:
+        return redirect('main:landingpage')
+    
 
     user_id = request.session.get("user_id")
 
@@ -514,6 +570,13 @@ def service_booking(request):
 
 # subcategory #
 def subcategory(request):
+
+    # Blocks users that are not logged in from accessing
+    user_id = request.session.get('user_id')
+    if not user_id:
+        return redirect('main:landingpage')
+    
+
     # This might break the code, if anyone know better, glad to see the fix
     subcategory_name = request.GET.get("subcategory_id")
 
@@ -566,11 +629,23 @@ def subcategory(request):
 
 
 def myorder(request):
+
+    # Blocks users that are not logged in from accessing
+    user_id = request.session.get('user_id')
+    if not user_id:
+        return redirect('main:landingpage')
+    
     return render(request, "myorder.html")
 
 
 # update order status #
 def update_order_status(request, order_id):
+
+    # Blocks users that are not logged in from accessing
+    user_id = request.session.get('user_id')
+    if not user_id:
+        return redirect('main:landingpage')
+
     next_status_mapping = {"STI04": "STI06", "STI06": "STI05", "STI05": "STI00"}
 
     # Fetch current status
@@ -605,6 +680,7 @@ def update_order_status(request, order_id):
 ## blue features ##
 # Testimony R
 def view_testimony(request):
+
     user_id = request.user
     user_query = "SELECT * FROM testimony"
     query_result = execute_sql_query(user_query)
@@ -618,15 +694,21 @@ def create_testimonial(request):
 
 # discount #
 def discount(request):
+
+    # Blocks users that are not logged in from accessing
+    user_id = request.session.get('user_id')
+    if not user_id:
+        return redirect('main:landingpage')
+
     voucher_query = """
-    SELECT v."Code","MinTrOrder", "NmbDayValid", "UserQuota", "Price", "Discount" 
-    FROM voucher v 
-    JOIN discount d
-    ON v."Code" = d."Code"
-"""
+        SELECT v."Code","MinTrOrder", "NmbDayValid", "UserQuota", "Price", "Discount" 
+        FROM voucher v 
+        JOIN discount d
+        ON v."Code" = d."Code"
+    """
     promo_query = """
-    SELECT "Code", "OfferEndDate" FROM promo
-"""
+        SELECT "Code", "OfferEndDate" FROM promo
+    """
     voucher_results = execute_sql_query(voucher_query)
     promo_results = execute_sql_query(promo_query)
     context = {
@@ -639,6 +721,7 @@ def discount(request):
 
 # voucher
 def purchase_voucher(request):
+
     if not request.user.is_authenticated:
         messages.error(request, "You need to log in to make a purchase.")
         return redirect("discount")  # Redirect to the discount page
@@ -681,6 +764,11 @@ def purchase_voucher(request):
 
 ## red features ##
 def mypay(request):
+
+    # Blocks users that are not logged in from accessing
+    user_id = request.session.get('user_id')
+    if not user_id:
+        return redirect('main:landingpage')
 
     user_id = request.session["user_id"]
 
@@ -992,6 +1080,12 @@ def mypay_transaction(request):
 
 # service job
 def service_job(request):
+
+    # Blocks users that are not logged in from accessing
+    user_id = request.session.get('user_id')
+    if not user_id:
+        return redirect('main:landingpage')
+
     user_id = request.session["user_id"]
     # fetch which categories worker is registered for
     categories_query = """
@@ -1111,6 +1205,12 @@ def service_job(request):
 
 # service job status
 def service_job_status(request):
+
+    # Blocks users that are not logged in from accessing
+    user_id = request.session.get('user_id')
+    if not user_id:
+        return redirect('main:landingpage')
+    
     # Update the order status where needed
     '''
     update_status_query = """
