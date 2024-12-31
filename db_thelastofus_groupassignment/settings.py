@@ -45,12 +45,11 @@ ALLOWED_HOSTS = [
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://naim.baziz-dbthelastofus.pbp.cs.ui.ac.id",
-    "http://naim-baziz-dbthelastofus.pbp.cs.ui.ac.id",
-    "http://naim-baziz-dbproject.pbp.cs.ui.ac.id",
-    "https://naim-baziz-dbproject.pbp.cs.ui.ac.id",
+    "https://naim.baziz-dbthelastofus.pbp.cs.ui.ac.id/",
+    "http://naim-baziz-dbthelastofus.pbp.cs.ui.ac.id/",
+    "http://naim-baziz-dbproject.pbp.cs.ui.ac.id/",
+    "https://naim-baziz-dbproject.pbp.cs.ui.ac.id/",
 ]
-
 
 # Application definition
 
