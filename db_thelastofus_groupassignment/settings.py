@@ -100,10 +100,18 @@ WSGI_APPLICATION = "db_thelastofus_groupassignment.wsgi.application"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    'default': dj_database_url.config(default="postgresql://postgres.fuhqmowfreadirspzmnk:basdatlastofus3@aws-0-us-east-1.pooler.supabase.com:6543/postgres")
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',  
+        'USER': 'postgres.fuhqmowfreadirspzmnk',  
+        'PASSWORD': 'basdatlastofus3',  
+        'HOST': 'aws-0-us-east-1.pooler.supabase.com',  
+        'PORT': '6543',  
+    }
 }
 
 # Comments
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -151,3 +159,5 @@ else:
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
