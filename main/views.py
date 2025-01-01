@@ -18,7 +18,7 @@ from django.db import connection
 from django.http import JsonResponse
 import uuid
 
-
+@csrf_exempt
 def execute_sql_query(query, params=None):
     """Helper function to execute raw SQL queries."""
     with connection.cursor() as cursor:
@@ -29,7 +29,7 @@ def execute_sql_query(query, params=None):
             return results
         return None
 
-
+@csrf_exempt
 def execute_sql_query(query, params=None):
     """Helper function to execute raw SQL queries."""
     with connection.cursor() as cursor:
@@ -40,7 +40,7 @@ def execute_sql_query(query, params=None):
             return results
         return None
 
-
+@csrf_exempt
 def show_main(request):
 
     # Blocks users that are not logged in from accessing
@@ -57,7 +57,7 @@ def show_main(request):
     }
     return render(request, "home.html", context)
 
-
+@csrf_exempt
 def landingpage(request):
     return render(request, "landingpage.html")
 
@@ -65,12 +65,12 @@ def landingpage(request):
 # yellow features #
 # register #
 
-
+@csrf_exempt
 def register(request):
     context = {"title": "Registration Page"}
     return render(request, "register.html", context)
 
-
+@csrf_exempt
 def register_customer(request):
     if request.method == "POST":
 
@@ -111,7 +111,7 @@ def register_customer(request):
 
     return render(request, "register_customer.html")
 
-
+@csrf_exempt
 def register_worker(request):
     if request.method == "POST":
 
@@ -159,7 +159,7 @@ def register_worker(request):
 
 ## login ##
 
-
+@csrf_exempt
 def login_user(request):
     if request.method == "POST":
         phonenum = request.POST.get("phonenumber")
@@ -217,12 +217,14 @@ def login_user(request):
 
 
 ## logout ##
+@csrf_exempt
 def logout_user(request):
     request.session.flush()
     return redirect("main:landingpage")
 
 
 ## profile ##
+@csrf_exempt
 def customer_profile(request):
 
     # Blocks users that are not logged in from accessing
@@ -262,7 +264,7 @@ def customer_profile(request):
         print(f"Error in worker_profile view: {e}")
         return HttpResponse("An error occured.")
 
-
+@csrf_exempt
 def worker_profile(request):
 
     # Blocks users that are not logged in from accessing
@@ -303,6 +305,7 @@ def worker_profile(request):
 
 
 ## update profile ##
+@csrf_exempt
 def update_customer_profile(request):
 
     # Blocks users that are not logged in from accessing
@@ -351,7 +354,7 @@ def update_customer_profile(request):
 
     return render(request, "update_customer_profile.html")
 
-
+@csrf_exempt
 def update_worker_profile(request):
 
     # Blocks users that are not logged in from accessing
@@ -416,6 +419,7 @@ def update_worker_profile(request):
 
 ## green features ##
 # homepage #
+@csrf_exempt
 def home(request):
 
     # Blocks users that are not logged in from accessing
@@ -452,7 +456,7 @@ def home(request):
 
     print(category_subcategory_result)
 
-
+@csrf_exempt
 def home(request):
 
     # Blocks users that are not logged in from accessing
@@ -510,7 +514,7 @@ def home(request):
     # print(category_subcategory_result)
     return render(request, "home.html", context)
 
-
+@csrf_exempt
 def worker_profile_summary(request):
 
     # Blocks users that are not logged in from accessing
@@ -522,6 +526,7 @@ def worker_profile_summary(request):
 
 
 # service booking #
+@csrf_exempt
 def service_booking(request):
 
     # Blocks users that are not logged in from accessing
@@ -569,6 +574,7 @@ def service_booking(request):
 
 
 # subcategory #
+@csrf_exempt
 def subcategory(request):
 
     # Blocks users that are not logged in from accessing
@@ -627,7 +633,7 @@ def subcategory(request):
     }
     return render(request, "subcategory.html", context)
 
-
+@csrf_exempt
 def myorder(request):
 
     # Blocks users that are not logged in from accessing
@@ -639,6 +645,7 @@ def myorder(request):
 
 
 # update order status #
+@csrf_exempt
 def update_order_status(request, order_id):
 
     # Blocks users that are not logged in from accessing
@@ -679,6 +686,7 @@ def update_order_status(request, order_id):
 
 ## blue features ##
 # Testimony R
+@csrf_exempt
 def view_testimony(request):
 
     user_id = request.user
@@ -687,12 +695,13 @@ def view_testimony(request):
     context = {"user": user_id, "testimonies": query_result}
     return render(request, "subcategory.html", context)
 
-
+@csrf_exempt
 def create_testimonial(request):
     return render(request, "create_testimonial.html")
 
 
 # discount #
+@csrf_exempt
 def discount(request):
 
     # Blocks users that are not logged in from accessing
@@ -720,6 +729,7 @@ def discount(request):
 
 
 # voucher
+@csrf_exempt
 def purchase_voucher(request):
 
     if not request.user.is_authenticated:
@@ -763,6 +773,7 @@ def purchase_voucher(request):
 
 
 ## red features ##
+@csrf_exempt
 def mypay(request):
 
     # Blocks users that are not logged in from accessing
@@ -803,6 +814,7 @@ def mypay(request):
 
 
 # mypay transaction #
+@csrf_exempt
 def mypay_transaction(request):
 
     user_id = request.session["user_id"]
@@ -1079,6 +1091,7 @@ def mypay_transaction(request):
 
 
 # service job
+@csrf_exempt
 def service_job(request):
 
     # Blocks users that are not logged in from accessing
@@ -1204,6 +1217,7 @@ def service_job(request):
 
 
 # service job status
+@csrf_exempt
 def service_job_status(request):
 
     # Blocks users that are not logged in from accessing
